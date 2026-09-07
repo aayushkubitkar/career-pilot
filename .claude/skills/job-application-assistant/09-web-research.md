@@ -103,6 +103,31 @@ When a posting arrives from an aggregator, search the employer's careers site fo
 
 **Aggregator anchor URLs are not postings.** A stored URL ending in a fragment (`.../jobs/ciso/#ikerian`) points at a listing page, not a posting. It will fetch successfully and return a page of unrelated job titles. Treat a fetch whose content does not match the expected title as a failed fetch, not as posting text.
 
+## US company review sites
+
+The Company Research Checklist in `04-job-evaluation.md` names **Glassdoor**, **Blind**
+(teamblind.com), **Levels.fyi**, and the relevant subreddits. They carry the insider view
+— culture, comp, interview process, layoff chatter — but expect friction getting at it:
+
+- **Glassdoor** soft-walls most content behind a login/"give a review to see reviews" gate
+  and its `robots.txt` disallows the review paths for `*`, so the `curl`-with-headers retry
+  in the escalation order **does not apply** (it's a real decline, not a WAF default).
+- **Blind** requires a work-email signup to read threads; only what search engines have
+  indexed is reachable.
+- **Levels.fyi** and **layoffs.fyi** are largely open and fetch fine.
+
+So the workable method is **`WebSearch`**, not `WebFetch`: search
+`glassdoor <company> reviews`, `blind <company> <topic>`, `<company> interview experience
+reddit`, `<company> layoffs`, and read the result snippets and any open pages. That yields
+real signal without circumventing a login wall.
+
+**What this research is for:** the user's own apply/skip decision and their interview prep
+(likely questions, process, what to probe about). It is **not** a cover-letter source — a
+Glassdoor snippet is a lead, subject to the same "verify against the company's own domain
+or independent reporting" bar as everything in "Verifying company claims" below. Anonymous
+reviews are one person's experience; look for a *pattern* across several, and never quote a
+review or name the site in an application.
+
 ## Verifying company claims
 
 `03-writing-style.md` rule 5 requires every company-specific claim in a cover letter to be independently verified. This file is how that verification gets done. The bar:

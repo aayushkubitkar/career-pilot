@@ -111,7 +111,12 @@ Does the role and company culture match the behavioral profile?
 | 40-59 | Some friction areas |
 | 0-39 | Significant culture mismatch |
 
-**Red flags to research:** Department disorganization, work dominated by maintenance over development, poor chemistry with leadership, culture mismatches. Check reviews, media coverage, LinkedIn connections, and network contacts for insider perspective.
+**Red flags to research:** recent layoffs or a hiring freeze, a role that's been reposted
+for months, leadership churn, "we work hard / fast-paced" as code for burnout, low
+Glassdoor rating with a pattern in the reviews (not one angry outlier), maintenance-heavy
+work dressed up as "greenfield", RTO reversals. Check Glassdoor/Blind reviews, layoffs.fyi,
+US tech press, LinkedIn connections, and network contacts for the insider view — per the
+Company Research Checklist below.
 
 ### 4. Location & Logistics (Pass/Fail + Notes)
 - Within commute range: PASS
@@ -195,11 +200,20 @@ Present the evaluation as:
 [1-2 sentences: apply/skip/apply with caveats]
 
 ### Company Research Checklist
-- [ ] Checked company website (mission, values, recent news)
-- [ ] Checked review sites (Glassdoor, Jobindex, etc.)
-- [ ] Checked LinkedIn for team size, recent hires, connections
-- [ ] Checked media for restructuring, growth, or workplace issues
-- [ ] Identified network contacts who may know the team/manager
+- [ ] Checked company website (mission, values, recent news, funding/earnings)
+- [ ] Checked US review/insider sites — **Glassdoor** (reviews, ratings, reported
+      interview questions & process), **Blind** / **teamblind.com** (comp, culture, layoff
+      chatter — candid, sometimes venty), **Levels.fyi** (comp by level & location),
+      **r/cscareerquestions** / company-specific subreddits. Most are login- or
+      bot-walled: work from Google-indexed snippets and what surfaces in `WebSearch`; see
+      `09-web-research.md` "US company review sites". Treat all of it as **signal for your
+      own decision and interview prep**, and as a *lead* — never a cover-letter fact —
+      unless independently confirmed.
+- [ ] Checked LinkedIn for team size, recent hires, connections, and the hiring manager
+- [ ] Checked news for layoffs, hiring freezes, restructuring, funding round, acquisition,
+      leadership churn (US tech press: TechCrunch, The Information, Bloomberg; layoffs.fyi
+      for the raw count)
+- [ ] Identified network contacts (LinkedIn, alumni) who may know the team or manager
 ```
 
 ## Company Research Cache
