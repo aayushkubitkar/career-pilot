@@ -23,11 +23,14 @@ of core we diverge on is a line we merge-conflict on at the next release.
 
 Goal: `/scrape` returns real, current US openings.
 
-### B1. `ats-search` skill (Greenhouse + Lever + Ashby, one skill) ✅ (2026-09-07, commit e45d4de)
+### B1. `ats-search` skill — Greenhouse + Lever + Ashby + SmartRecruiters ✅
 
-Delivered as specced. `.agents/skills/ats-search/` — zero-dep bun CLI, `search`/`detail`,
-fans across `companies.csv` (ships ~25 verified US companies), per-company error isolation,
-37 offline tests, live-verified against all three APIs. Notes:
+Commit e45d4de (GH/Lever/Ashby, 2026-09-07) + SmartRecruiters connector added later the
+same day. `.agents/skills/ats-search/` — zero-dep bun CLI, `search`/`detail`, fans across
+`companies.csv` (~30 verified US companies), per-company error isolation, 41 offline tests,
+live-verified. SmartRecruiters notes: paginated (capped ~150 unfiltered), server-side `q`,
+200s on unknown company → `meta.notes` not `meta.errors`, case-sensitive identifiers,
+skews enterprise/industrial (Bosch, WD, Experian). More detail:
 - Company list lives at `.agents/skills/ats-search/companies.csv` (+ `.example.csv`), not
   `documents/` — it's config, not career material, and ships populated so the skill works
   out of the box.
@@ -182,16 +185,22 @@ machine's Python 3.9 — the repo needs 3.10+; identical on pristine v1.7.1, gre
 
 ## Phase D — US tracking & prep polish
 
-- [ ] **Salary**: document a US `salary_data.json` shape sourced from a levels.fyi export
-      or BLS OES data; `salary_lookup.py` already takes BYO data — add a US example +
-      `tools/` converter if the format differs.
-- [ ] **Company research** (`09-web-research.md`): add Glassdoor, Blind, Levels.fyi, and
-      US trade press to the research checklist; keep the verify-before-use rule.
-- [ ] Review `/gmail-sync`, `/interview`, `/html-report`, `/outcome` for Danish-isms
-      (labels, date formats, "notice period" expectations) — expected to be light.
-- [ ] `/notion-sync` unchanged.
+- [x] **Company research** — US insider sources (Glassdoor, Blind, Levels.fyi, layoffs.fyi,
+      subreddits, US tech press) in `04-job-evaluation.md`'s Company Research Checklist
+      (both `/apply` Step 3 and `/interview` Step 2 use it) + a "US company review sites"
+      section in `09-web-research.md` (login-walled → WebSearch not WebFetch; leads not
+      cover-letter facts). Commit on 2026-09-07.
+- [ ] **Salary** — *deprioritized* (see the value-prop discussion). levels.fyi has no free
+      export, BLS OES is coarse, and most US postings now carry a legally-required pay
+      range that `10-us-application-specifics.md` already tells `/apply` to anchor to.
+      Revisit only if company-level comp intel becomes a felt need.
+- [ ] `/gmail-sync` / `/interview` / `/html-report` / `/outcome` Danish-ism sweep —
+      *skipped*, judged near-zero value (not market-specific; maybe a "notice period"
+      phrase in `/outcome`).
+- [x] `/notion-sync` unchanged — confirmed.
 
-**Ships:** the full loop, US-tuned end to end.
+**Ships:** the company-research half. The rest of the original Phase D scope was cut as
+low-ROI after the value-prop review.
 
 ---
 

@@ -54,13 +54,13 @@ whose key is unset fails cleanly (`code: MISSING_CREDENTIALS`) and `/scrape` ski
 
 | Area | Upstream (Denmark) | CareerPilot (US) |
 |---|---|---|
-| Job portals | Jobindex, Jobnet, Akademikernes Jobbank, Jobdanmark | Greenhouse / Lever / Ashby ATS APIs, USAJOBS, Adzuna; keep LinkedIn + freehire |
+| Job portals | Jobindex, Jobnet, Akademikernes Jobbank, Jobdanmark | Greenhouse / Lever / Ashby / SmartRecruiters ATS APIs, Adzuna aggregator; keep LinkedIn + freehire |
 | Eligibility gate | Citizenship / PR of the country | US work authorization: citizen · GC · OPT / STEM OPT · H-1B transfer · needs sponsorship; detect "no sponsorship", ITAR "US Person", clearance |
 | CV / résumé | "CV", 2-page moderncv | "Resume", 1 page for students / new-grad / <10 yrs (2-page option kept for senior); no photo, DOB, marital status, nationality |
 | Behavioral profile | PI / DISC assumed | PI / DISC optional; self-assessment path is primary |
 | Application forms | EU free-text fields | + US EEO / voluntary self-identification questions, work-auth form questions, salary-history-ban awareness by state |
 | Salary data | Danish union statistics | BYO US data (levels.fyi export, BLS OES); format documented |
-| Company research | Jobindex reviews | Glassdoor, Blind, Levels.fyi, US press |
+| Company research | Jobindex reviews | Glassdoor, Blind, Levels.fyi, layoffs.fyi, US tech press ✅ |
 
 Everything else — `/scrape` orchestration, `/rank`, the `/apply` drafter–reviewer + PDF
 verification loop, `/interview`, `/outcome`, `/gmail-sync`, `/notion-sync`, `/html-report`,
@@ -71,15 +71,16 @@ verification loop, `/interview`, `/outcome`, `/gmail-sync`, `/notion-sync`, `/ht
 Detailed phase specs: [`docs/careerpilot/us-adaptation-roadmap.md`](docs/careerpilot/us-adaptation-roadmap.md).
 
 - **Phase A — Adopt & orient** ✅ vendor v1.7.1, upstream remote, this doc. `/setup` runs as-is.
-- **Phase B — US discovery** — `ats-search` (Greenhouse+Lever+Ashby) ✅ · `adzuna-search`
-  (broad aggregator) ✅ · `usajobs-search` (federal) **parked** (user not targeting federal).
+- **Phase B — US discovery** — `ats-search` (Greenhouse+Lever+Ashby+**SmartRecruiters**) ✅ ·
+  `adzuna-search` (broad aggregator) ✅ · `usajobs-search` (federal) **parked**.
   US `search-queries.md` + settings ✅.
 - **Phase C — US application conventions** ✅ — US Work Authorization Gate
   (`04-job-evaluation.md`); profile-driven résumé length + US conventions
   (`05-cv-templates.md`, `cv/`, `apply.md`); `10-us-application-specifics.md` (EEO,
   work-auth form Qs, salary-history bans); `/setup` captures work auth + résumé length.
-- **Phase D — US tracking & prep polish** — US salary data source; US company-research
-  sources; review `/gmail-sync` / `/interview` / `/html-report` for US-ism. Ships: full loop.
+- **Phase D — US tracking & prep polish** — company-research sources US-ified ✅
+  (`04-job-evaluation.md` checklist + `09-web-research.md`). Salary data + the Danish-ism
+  sweep were cut as low-ROI after review.
 - **Phase E — Upstream cadence** — weekly triage, adopt releases.
 
 ## Attribution
