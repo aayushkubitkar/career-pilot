@@ -10,6 +10,7 @@ import {
   makeId,
   snippetOf,
   type Company,
+  type ListOpts,
   type Posting,
 } from "../helpers.js";
 
@@ -56,7 +57,7 @@ export function toPosting(company: Company, j: GhJob): Posting {
   };
 }
 
-export async function list(company: Company): Promise<Posting[]> {
+export async function list(company: Company, _opts: ListOpts): Promise<Posting[]> {
   const data = await fetchJson<GhList>(`${BASE}/${encodeURIComponent(company.slug)}/jobs`);
   if (!data) throw new Error(`board "${company.slug}" not found on Greenhouse (404)`);
   return (data.jobs ?? []).map((j) => {

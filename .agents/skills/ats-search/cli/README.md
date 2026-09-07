@@ -1,7 +1,7 @@
 # ats-search CLI
 
-Searches Greenhouse, Lever, and Ashby company job boards across a curated company list.
-Public keyless JSON APIs, zero runtime dependencies (plain `bun` + `fetch`).
+Searches Greenhouse, Lever, Ashby, and SmartRecruiters company job boards across a curated
+company list. Public keyless JSON APIs, zero runtime dependencies (plain `bun` + `fetch`).
 
 ```bash
 bun install            # dev types only; not needed to run
@@ -26,6 +26,7 @@ src/
     greenhouse.ts        list + per-job detail
     lever.ts             list + per-posting detail
     ashby.ts             list (+ detail refetches the board — no per-posting endpoint)
+    smartrecruiters.ts   paginated list w/ server-side q + per-posting detail
   commands/
     search.ts            fan out, filter, sort, paginate, render
     detail.ts            resolve id/URL -> one posting

@@ -1,11 +1,21 @@
 // Shared plumbing for the ats-search CLI: the normalized posting shape every
 // connector emits, a JSON fetch with backoff, the company-list (CSV) reader, the
-// client-side filters (these ATS APIs have no server-side keyword/date filter),
-// and a small concurrency pool for fanning out across many company boards.
+// client-side filters, and a small concurrency pool for fanning out across many
+// company boards. Greenhouse/Lever/Ashby have no server-side query — the whole
+// board is fetched and filtered locally; SmartRecruiters paginates and does take
+// a server-side query, so `list()` receives the active filters as a hint.
 
-export type AtsType = "greenhouse" | "lever" | "ashby";
+export type AtsType = "greenhouse" | "lever" | "ashby" | "smartrecruiters";
 
-export const ATS_TYPES: AtsType[] = ["greenhouse", "lever", "ashby"];
+export const ATS_TYPES: AtsType[] = ["greenhouse", "lever", "ashby", "smartrecruiters"];
+
+/** Filters passed to a connector's `list()`. Greenhouse/Lever/Ashby ignore these
+ *  (they fetch the whole board); SmartRecruiters uses them server-side and caps. */
+export interface ListOpts {
+  query?: string;
+  location?: string;
+  maxResults?: number;
+}
 
 export const USER_AGENT = "Mozilla/5.0 (compatible; ats-search-cli/1.0)";
 

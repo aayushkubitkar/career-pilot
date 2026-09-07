@@ -9,6 +9,7 @@ import {
   makeId,
   snippetOf,
   type Company,
+  type ListOpts,
   type Posting,
 } from "../helpers.js";
 
@@ -81,7 +82,7 @@ export function toPosting(company: Company, p: LeverPosting): Posting {
   };
 }
 
-export async function list(company: Company): Promise<Posting[]> {
+export async function list(company: Company, _opts: ListOpts): Promise<Posting[]> {
   const data = await fetchJson<LeverPosting[]>(
     `${BASE}/${encodeURIComponent(company.slug)}?mode=json`,
   );

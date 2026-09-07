@@ -72,17 +72,30 @@ export async function runSearch(opts: SearchOpts): Promise<number> {
 
   const priorityBySlug = new Map(selected.map((c) => [c.slug, c.priority] as const));
   const errors: CompanyError[] = [];
+  const notes: string[] = [];
+
+  // A hint the SmartRecruiters connector uses server-side; the others ignore it.
+  // Ask for more than `--limit` so client-side filters still have rows to work with.
+  const maxResults = Math.max(opts.limit ?? 0, 200);
 
   const perCompany = await pool(selected, CONCURRENCY, async (c) => {
     try {
-      return await CONNECTORS[c.ats].list(c);
-    } catch (e) {
-      errors.push({
-        company: c.name,
-        ats: c.ats,
-        slug: c.slug,
-        error: e instanceof Error ? e.message : String(e),
+      return await CONNECTORS[c.ats].list(c, {
+        query: opts.query,
+        location: opts.location,
+        maxResults,
       });
+    } catch (e) {
+      if ((e as { soft?: boolean }).soft) {
+        notes.push(`${c.name} (${c.ats}): ${e instanceof Error ? e.message : String(e)}`);
+      } else {
+        errors.push({
+          company: c.name,
+          ats: c.ats,
+          slug: c.slug,
+          error: e instanceof Error ? e.message : String(e),
+        });
+      }
       return [] as Posting[];
     }
   });
@@ -115,6 +128,12 @@ export async function runSearch(opts: SearchOpts): Promise<number> {
   // scannable; `detail` fetches the body).
   const results = pageRows.map(({ description, ...rest }) => rest);
 
+  if (opts.format === "table" || opts.format === "plain") {
+    for (const n of notes) process.stdout.write(`note: ${n}\n`);
+    for (const e of errors) process.stdout.write(`error: ${e.company} (${e.ats}): ${e.error}\n`);
+    if (notes.length || errors.length) process.stdout.write("\n");
+  }
+
   if (opts.format === "table") {
     process.stdout.write(renderTable(results) + "\n");
   } else if (opts.format === "plain") {
@@ -129,6 +148,7 @@ export async function runSearch(opts: SearchOpts): Promise<number> {
             total,
             companies: selected.length,
             errors,
+            notes,
           },
           results,
         },

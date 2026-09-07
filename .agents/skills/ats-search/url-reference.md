@@ -1,7 +1,7 @@
 # ats-search — endpoint reference
 
-Maintenance notes for when Greenhouse, Lever, or Ashby changes its public board API.
-All three are unauthenticated JSON. Connector code: `cli/src/connectors/<ats>.ts`.
+Maintenance notes for when Greenhouse, Lever, Ashby, or SmartRecruiters changes its public
+board API. All four are unauthenticated JSON. Connector code: `cli/src/connectors/<ats>.ts`.
 
 ---
 
@@ -91,11 +91,51 @@ list already carries `descriptionPlain` in full, so `detail` refetches and filte
 
 ---
 
+## SmartRecruiters — Posting API
+
+Docs: <https://developers.smartrecruiters.com/reference/postingapisearch>
+
+| Purpose | Request |
+|---|---|
+| List | `GET https://api.smartrecruiters.com/v1/companies/{id}/postings?q=&country=us&limit={≤100}&offset={n}` |
+| One posting | `GET https://api.smartrecruiters.com/v1/companies/{id}/postings/{postingId}` |
+
+`{id}` = careers URL handle (`jobs.smartrecruiters.com/{id}`), **case-sensitive**
+(`BoschGroup`, not `boschgroup`). **Unknown company → HTTP 200 with `totalFound: 0`**, not
+404 — the connector flags an unfiltered empty result as a `soft` error (→ `meta.notes`).
+
+**Paginated** — unlike the other three, the whole board is not one call. Response:
+`{ offset, limit, totalFound, content: [ … ] }`. The connector pages by `PAGE=100` and
+stops at `maxResults` (default 150 when no `q`). It always sends `country=us`; a
+city-shaped `--location` is passed as `city=`.
+
+List item fields used:
+
+| Field | Notes |
+|---|---|
+| `id` | numeric string → `externalId` |
+| `name` | title (trim) |
+| `releasedDate` | ISO → our `date` |
+| `location.{city,region,country,remote,hybrid,fullLocation}` | `fullLocation` preferred; consecutive duplicate segments collapsed ("United States, United States") |
+| `department.label` / `function.label` | our `team` |
+| — | no `postingUrl` in the list; `url` is built as `https://jobs.smartrecruiters.com/{id}/{postingId}` (verified to resolve) |
+
+Detail (`/postings/{postingId}`) adds `postingUrl`, `applyUrl`, and
+`jobAd.sections.{companyDescription,jobDescription,qualifications,additionalInformation}`
+(each `{title, text}` with HTML `text`). The connector folds jobDescription +
+qualifications + additionalInformation into `description`.
+
+No compensation or deadline in the API.
+
+---
+
 ## Shared
 
 - `id` format: `"{ats}:{slug}:{externalId}"`. `externalId` may contain colons (rare); the
   parser splits on the first two colons only.
 - HTTP: `User-Agent: Mozilla/5.0 (compatible; ats-search-cli/1.0)`, `Accept: application/json`,
   20s timeout, exp backoff (max 5 retries) on 429/5xx, `null` on 404, throw on hard failure.
-- No API takes a keyword or date parameter — `--query`, `--location`, `--jobage`,
-  `--remote` are all applied client-side after fetching each board in full.
+- Greenhouse/Lever/Ashby take no keyword or date parameter — `--query`, `--location`,
+  `--jobage`, `--remote` are applied client-side after fetching each board in full.
+  SmartRecruiters takes `q` (server-side) + `country`/`city`; the client-side filters still
+  run on top for consistency.

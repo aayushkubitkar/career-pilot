@@ -32,6 +32,9 @@ function resolveTarget(
   // Ashby: https://jobs.ashbyhq.com/{slug}/{uuid}
   m = id.match(/jobs\.ashbyhq\.com\/([^/?#]+)\/([0-9a-f-]{36})/i);
   if (m) return { ats: "ashby", slug: m[1]!, externalId: m[2]! };
+  // SmartRecruiters: https://jobs.smartrecruiters.com/{slug}/{numericId}-{optional-slug}
+  m = id.match(/smartrecruiters\.com\/([^/?#]+)\/(\d{6,})/i);
+  if (m) return { ats: "smartrecruiters", slug: m[1]!, externalId: m[2]! };
   return null;
 }
 

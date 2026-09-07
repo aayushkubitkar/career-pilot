@@ -16,6 +16,15 @@ describe("makeId / parseId", () => {
     expect(id).toBe("greenhouse:stripe:a:b:c");
     expect(parseId(id)).toEqual({ ats: "greenhouse", slug: "stripe", externalId: "a:b:c" });
   });
+  test("accepts every known ats", () => {
+    expect(parseId("smartrecruiters:BoschGroup:744000147347753")).toEqual({
+      ats: "smartrecruiters",
+      slug: "BoschGroup",
+      externalId: "744000147347753",
+    });
+    expect(parseId("ashby:ramp:abc")!.ats).toBe("ashby");
+  });
+
   test("rejects an unknown ats or a malformed id", () => {
     expect(parseId("monster:x:1")).toBeNull();
     expect(parseId("nope")).toBeNull();

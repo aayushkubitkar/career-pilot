@@ -8,6 +8,7 @@ import {
   makeId,
   snippetOf,
   type Company,
+  type ListOpts,
   type Posting,
 } from "../helpers.js";
 
@@ -72,7 +73,7 @@ async function fetchBoard(slug: string): Promise<AshbyJob[]> {
   return (data.jobs ?? []).filter((j) => j.isListed !== false);
 }
 
-export async function list(company: Company): Promise<Posting[]> {
+export async function list(company: Company, _opts: ListOpts): Promise<Posting[]> {
   const jobs = await fetchBoard(company.slug);
   return jobs.map((j) => toPosting(company, j));
 }

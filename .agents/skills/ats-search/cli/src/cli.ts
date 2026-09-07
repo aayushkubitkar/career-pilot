@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 // Self-contained CLI for searching company job boards on the Greenhouse, Lever,
-// and Ashby ATS platforms. Public keyless APIs, zero runtime dependencies — runs
+// Ashby, and SmartRecruiters ATS platforms. Public keyless APIs, zero runtime dependencies — runs
 // anywhere `bun` is available with nothing installed beyond the repo clone.
 //
 // ATS boards are company-scoped, so this one skill fans out across a
@@ -48,7 +48,7 @@ function parseFlags(argv: string[]): Flags {
   return flags;
 }
 
-const HELP = `ats-search — search Greenhouse / Lever / Ashby company job boards
+const HELP = `ats-search — search Greenhouse / Lever / Ashby / SmartRecruiters company job boards
 
 USAGE
   bun run src/cli.ts search [flags]
@@ -72,7 +72,7 @@ SEARCH FLAGS
 
 DETAIL
   <id|url>   An id from a search result ("greenhouse:stripe:12345") or a
-             Greenhouse / Lever / Ashby job-board URL.
+             Greenhouse / Lever / Ashby / SmartRecruiters job-board URL.
 
 EXAMPLES
   bun run src/cli.ts search -q "software engineer" --jobage 14 --format table
@@ -81,7 +81,9 @@ EXAMPLES
   bun run src/cli.ts detail lever:leverdemo:681fbc53-1e34-4a46-8677-3a78118674eb --format plain
 
 Public keyless ATS APIs. Keep the company list to a curated set (tens to low
-hundreds); each run fetches every listed board.
+hundreds); each run fetches every listed board. SmartRecruiters boards can be
+huge, so a SmartRecruiters company without a --query is capped at ~150 recent
+postings; SmartRecruiters identifiers are case-sensitive (e.g. BoschGroup).
 `;
 
 const KNOWN_FLAGS: Record<string, Set<string>> = {

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { toPosting as gh, type GhJob } from "../src/connectors/greenhouse";
 import { toPosting as lever, type LeverPosting } from "../src/connectors/lever";
 import { toPosting as ashby, type AshbyJob } from "../src/connectors/ashby";
+import { toPosting as sr } from "../src/connectors/smartrecruiters";
 import type { Company } from "../src/helpers";
 
 const company = (over: Partial<Company> = {}): Company => ({
@@ -112,5 +113,53 @@ describe("ashby.toPosting", () => {
 
   test("isRemote false is preserved, not coerced to null", () => {
     expect(ashby(company(), job({ isRemote: false })).remote).toBe(false);
+  });
+});
+
+describe("smartrecruiters.toPosting", () => {
+  const summary = {
+    id: "744000147545499",
+    name: "  Quality Engineer  ",
+    refNumber: "REF1",
+    releasedDate: "2026-09-04T12:00:00.000Z",
+    company: { identifier: "AveryDennison", name: "Avery Dennison" },
+    location: { city: "Painesville", region: "OH", country: "us", remote: false, hybrid: false, fullLocation: "Painesville, OH, United States" },
+    department: { label: "Engineering Services" },
+    function: { label: "Engineering" },
+  };
+
+  test("summary form: id, trimmed title, team, url, date; no description/snippet", () => {
+    const p = sr(company({ slug: "AveryDennison", name: "Avery Dennison" }), summary as never);
+    expect(p.id).toBe("smartrecruiters:AveryDennison:744000147545499");
+    expect(p.title).toBe("Quality Engineer");
+    expect(p.team).toBe("Engineering Services");
+    expect(p.date).toBe("2026-09-04T12:00:00.000Z");
+    expect(p.url).toBe("https://jobs.smartrecruiters.com/AveryDennison/744000147545499");
+    expect(p.remote).toBe(false);
+    expect(p.snippet).toBeNull();
+    expect(p.description).toBeNull();
+  });
+
+  test("collapses a duplicated location segment", () => {
+    const p = sr(company(), { ...summary, location: { ...summary.location, fullLocation: "United States, United States" } } as never);
+    expect(p.location).toBe("United States");
+  });
+
+  test("detail form: folds jobAd sections into the description", () => {
+    const detail = {
+      ...summary,
+      postingUrl: "https://jobs.smartrecruiters.com/AveryDennison/744000147545499-quality-engineer",
+      jobAd: {
+        sections: {
+          jobDescription: { title: "The role", text: "<p>Lead quality improvements.</p>" },
+          qualifications: { title: "You have", text: "<ul><li>1+ years in Quality</li></ul>" },
+        },
+      },
+    };
+    const p = sr(company({ slug: "AveryDennison" }), detail as never, detail as never);
+    expect(p.url).toBe(detail.postingUrl);
+    expect(p.description).toContain("Lead quality improvements.");
+    expect(p.description).toContain("1+ years in Quality");
+    expect(p.snippet).toBeTruthy();
   });
 });
