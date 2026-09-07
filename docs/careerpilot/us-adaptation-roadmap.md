@@ -23,7 +23,20 @@ of core we diverge on is a line we merge-conflict on at the next release.
 
 Goal: `/scrape` returns real, current US openings.
 
-### B1. `ats-search` skill (Greenhouse + Lever + Ashby, one skill)
+### B1. `ats-search` skill (Greenhouse + Lever + Ashby, one skill) ✅ (2026-09-07, commit e45d4de)
+
+Delivered as specced. `.agents/skills/ats-search/` — zero-dep bun CLI, `search`/`detail`,
+fans across `companies.csv` (ships ~25 verified US companies), per-company error isolation,
+37 offline tests, live-verified against all three APIs. Notes:
+- Company list lives at `.agents/skills/ats-search/companies.csv` (+ `.example.csv`), not
+  `documents/` — it's config, not career material, and ships populated so the skill works
+  out of the box.
+- `id` format is `{ats}:{slug}:{externalId}`.
+- Greenhouse `search` snippets are null (base list has no body); Lever/Ashby carry one.
+- Wire-up done: `settings.json` + `security_guards.py` allowlist, US `search-queries.md`.
+  The four Danish portals already ship `enabled: false` upstream — nothing to disable.
+
+### B1 spec (as built)
 
 ATS job boards are **company-scoped, not market-scoped**, so a single skill that fans out
 across a user-maintained company list beats one skill per ATS.
@@ -72,14 +85,13 @@ across a user-maintained company list beats one skill per ATS.
 
 ### B4. Wire-up
 
-- [ ] `.claude/settings.json`: add `Bash(bun run .agents/skills/ats-search/cli/src/cli.ts:*)`
-      and the same for `usajobs-search`, `adzuna-search`.
-- [ ] Set `enabled: false` in the four Danish portal skills' `SKILL.md`
-      (`jobindex`, `jobnet`, `jobbank`, `jobdanmark`) — kept installed, skipped by `/scrape`.
-- [ ] Rewrite `.claude/skills/job-scraper/search-queries.md` for US: target titles,
-      US metros + "Remote (US)", and the ATS/USAJOBS/Adzuna query mapping.
+- [x] `.claude/settings.json` + `tools/security_guards.py`: `ats-search` allowlist entry.
+      (`usajobs-search`, `adzuna-search` entries land with B2/B3.)
+- [x] Danish portals — already `enabled: false` upstream; nothing to do.
+- [x] `.claude/skills/job-scraper/search-queries.md` rewritten for the US (ats-search
+      primary, LinkedIn/freehire kept, Danish off, WebSearch fallback list = US boards).
 - [ ] `.env.example` (new, tracked): `USAJOBS_API_TOKEN`, `USAJOBS_USER_AGENT`,
-      `ADZUNA_APP_ID`, `ADZUNA_APP_KEY`.
+      `ADZUNA_APP_ID`, `ADZUNA_APP_KEY` — lands with B2/B3.
 
 **Ships:** `/scrape` searches curated US companies + federal + an aggregator, dedupes into
 `seen_jobs.json` as today, `/rank` and `/apply` consume the results unchanged.

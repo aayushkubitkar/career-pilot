@@ -56,9 +56,8 @@ verification loop, `/interview`, `/outcome`, `/gmail-sync`, `/notion-sync`, `/ht
 Detailed phase specs: [`docs/careerpilot/us-adaptation-roadmap.md`](docs/careerpilot/us-adaptation-roadmap.md).
 
 - **Phase A — Adopt & orient** ✅ vendor v1.7.1, upstream remote, this doc. `/setup` runs as-is.
-- **Phase B — US discovery** — `greenhouse-search`, `lever-search`, `ashby-search`,
-  `usajobs-search`, `adzuna-search` portal skills; disable the 4 Danish portals; US
-  `search-queries.md`; settings allowlist. Ships: `/scrape` returns real US openings.
+- **Phase B — US discovery** — 🚧 `ats-search` (Greenhouse+Lever+Ashby, one skill) ✅ done;
+  `usajobs-search` + `adzuna-search` next. US `search-queries.md` + settings allowlist ✅.
 - **Phase C — US application conventions** — US work-auth eligibility gate; US résumé
   templates + rules; `10-us-application-specifics.md` (EEO, work-auth form Qs, salary
   history); `/setup` captures US work auth. Ships: `/apply` produces US-correct résumés.
