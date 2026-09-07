@@ -1,0 +1,4 @@
+name,ats,slug,priority
+Stripe,greenhouse,stripe,high
+Spotify,lever,spotify,normal
+Ramp,ashby,ramp,low

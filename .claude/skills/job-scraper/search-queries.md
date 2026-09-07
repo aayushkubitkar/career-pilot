@@ -4,22 +4,39 @@
 
 ## Installed portal CLIs (primary for `/scrape`)
 
-`/scrape` discovers every portal skill under `.agents/skills/*/SKILL.md` and runs its CLI first. Shipped country-agnostic CLIs include `linkedin-search` and `freehire-search`; Danish demos and any skill you add with `/add-portal` are included the same way. You do **not** need a matching `site:` line below for those CLIs to run.
+`/scrape` discovers every portal skill under `.agents/skills/*/SKILL.md` and runs its CLI first. You do **not** need a matching `site:` line below for those CLIs to run.
 
-The `site:` query templates in this file are the **WebSearch fallback** — for portals without a CLI, company career pages, or when a CLI fails.
+CareerPilot (US market) ships these **enabled**:
+
+- **`ats-search`** — Greenhouse / Lever / Ashby company boards, fanned across
+  `.agents/skills/ats-search/companies.csv`. This is the primary US source: it hits the
+  ATS vendors' own public JSON APIs (no scraping), so results are clean and current.
+  **Maintain `companies.csv`** — it's your target-company list. `/setup --section search`
+  and `/add-portal` can help you grow it; a slug is the handle in
+  `job-boards.greenhouse.io/<slug>`, `jobs.lever.co/<slug>`, or `jobs.ashbyhq.com/<slug>`.
+- **`linkedin-search`** — LinkedIn public listings; pass a US location
+  (`-l "San Francisco Bay Area"`, `-l "New York, NY"`, `-l "Remote"`). Personal use, low volume.
+- **`freehire-search`** — multi-market tech aggregator; scope with `--region us --country US`.
+
+The four Danish demo portals (`jobindex`, `jobnet`, `jobbank`, `jobdanmark`) ship
+`enabled: false` and `/scrape` skips them — leave them off for a US search.
+
+The `site:` query templates in this file are the **WebSearch fallback** — for boards without a CLI (companies on Workday / iCIMS / Taleo, or Indeed / built-in careers pages) and when a CLI fails.
 
 **Language scope:** write every query category in every language listed in your CLAUDE.md Languages table (typically 1-2, sometimes more). A posting requiring a language you have *not* declared, as a job condition, is excluded before scoring; a posting requiring a *higher level* than you declared in a language you *do* work in is flagged for your own judgment, not excluded — see `04-job-evaluation.md`'s Language Gate, the single source of truth for this rule. Translate each category's keywords rather than machine-translating word-for-word (e.g. "Frontend Developer" -> "Desarrollador Frontend", not a literal word-for-word translation) if you work in more than one language.
 
-## Search Sites
+## Search Sites (WebSearch fallback only)
 
-Primary (your market's job boards - scaffold one with `/add-portal`):
-- **[YOUR_JOB_BOARD]** - your market's largest general job board
-- **linkedin.com/jobs** - LinkedIn job listings (filter: [YOUR_COUNTRY] / [YOUR_CITY]); also covered by `linkedin-search` CLI
-- **[YOUR_INDUSTRY_JOB_BOARD]** - a niche/industry board for your field (optional)
-- **[YOUR_ADDITIONAL_JOB_BOARD]** - another major board for your market (optional)
+US boards without a CLI here — use `site:` queries against these:
+- **linkedin.com/jobs** - also covered by the `linkedin-search` CLI (prefer the CLI)
+- **boards.greenhouse.io** / **job-boards.greenhouse.io** - for a company not yet in `companies.csv`
+- **jobs.lever.co**, **jobs.ashbyhq.com** - same
+- **jobs.smartrecruiters.com** - SmartRecruiters boards (no CLI yet)
+- **builtin.com**, **[YOUR_INDUSTRY_JOB_BOARD]** - niche/industry boards for your field (optional)
+- **usajobs.gov** - federal roles (optional; a dedicated CLI is planned)
 
 Secondary (company career pages via Google):
-- Direct Google searches with `site:` filters for known target companies
+- Direct `site:` searches for target companies on Workday / iCIMS / Taleo (no public API)
 
 ## Query Categories
 

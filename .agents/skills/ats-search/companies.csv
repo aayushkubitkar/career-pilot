@@ -1,0 +1,43 @@
+# ats-search company list — the boards `/scrape` fans out across.
+# Format:  name,ats,slug[,priority]
+#   name      display name shown on every posting from this company
+#   ats       greenhouse | lever | ashby
+#   slug      the board handle in the ATS URL:
+#               Greenhouse  boards.greenhouse.io/<slug>          -> boards-api.greenhouse.io/v1/boards/<slug>/jobs
+#               Lever       jobs.lever.co/<slug>
+#               Ashby       jobs.ashbyhq.com/<slug>
+#   priority  high | normal | low  (optional, default normal) — sorts results and
+#             feeds `--priority`; not a filter unless you pass that flag
+#
+# Copy this file to companies.csv and edit it. `#` comments and blank lines are ignored.
+# Companies on Workday, iCIMS, Taleo, etc. are not supported here (no public JSON board API).
+# Verify a slug with:  bun run cli/src/cli.ts search --company <slug> --limit 3 --format table
+
+name,ats,slug,priority
+Anthropic,greenhouse,anthropic,high
+OpenAI,ashby,openai,high
+Stripe,greenhouse,stripe,high
+Databricks,greenhouse,databricks,high
+Figma,greenhouse,figma,normal
+Discord,greenhouse,discord,normal
+Coinbase,greenhouse,coinbase,normal
+Airbnb,greenhouse,airbnb,normal
+Instacart,greenhouse,instacart,normal
+Robinhood,greenhouse,robinhood,normal
+Dropbox,greenhouse,dropbox,normal
+Cloudflare,greenhouse,cloudflare,normal
+Reddit,greenhouse,reddit,normal
+Gusto,greenhouse,gusto,normal
+Scale AI,greenhouse,scaleai,normal
+Brex,greenhouse,brex,normal
+Airtable,greenhouse,airtable,low
+Spotify,lever,spotify,normal
+Palantir,lever,palantir,normal
+Ramp,ashby,ramp,normal
+Linear,ashby,linear,low
+Notion,ashby,notion,normal
+Replit,ashby,replit,normal
+Perplexity,ashby,perplexity,high
+Hex,ashby,hex,low
+Baseten,ashby,baseten,low
+Modal,ashby,modal,low
