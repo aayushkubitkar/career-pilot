@@ -6,7 +6,7 @@
 %% Compile with: lualatex main_example.tex
 %% (pdflatex often fails on modern MiKTeX with fontawesome5 font-expansion errors.)
 
-\documentclass[11pt,a4paper,sans]{moderncv}
+\documentclass[11pt,letterpaper,sans]{moderncv} % US Letter — see 05-cv-templates.md "US résumé conventions"
 \moderncvstyle{banking}
 \moderncvcolor{blue}
 
@@ -44,9 +44,9 @@
 
 % personal data
 \name{[First]}{[Last]}
-% If you have no address to list, DELETE this whole line. \address{}{}{} fails
-% with "There's no line here to end" on every moderncv version.
-\address{[Your Address, City, Country]}{}{}
+% US résumé: city + state only, never a street address. To list nothing, DELETE
+% this whole line -- \address{}{}{} fails with "There's no line here to end".
+\address{[City, ST]}{}{}
 \phone[mobile]{[+XX XXXXXXXXXX]}
 \email{[your.email@example.com]}
 \extrainfo{\href{[https://linkedin.com/in/your-profile]}{LinkedIn}, \href{[https://github.com/your-username]}{GitHub}}

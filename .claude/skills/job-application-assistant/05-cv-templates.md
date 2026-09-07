@@ -6,6 +6,33 @@ framework_version: 1.4.3
 
 <!-- SETUP: Profile statements and section ordering are personalized by running /setup -->
 
+## US résumé conventions
+
+CareerPilot targets the **US market**. "CV" throughout this file means the one-to-two-page
+**résumé** US employers expect — not an academic CV. The moderncv template and every
+`cv/main_*.tex` filename stay as they are; only the conventions below change.
+
+- **Length** — driven by the profile's **`Resume length`** line (`CLAUDE.md` Identity).
+  `1-page` for students, new grads, and roughly under 10 years of experience; `2-page`
+  once the experience justifies it. This replaces the old hard 2-page rule — see
+  "Page budget" below.
+- **Paper size** — US Letter. The template sets `letterpaper`; do not change it to `a4paper`.
+- **Do not include** — photo, date of birth, age, marital status, nationality, or a full
+  street address. US employers screen these out (and some ATSes choke on them). The
+  contact block is name, city + state, phone, email, and links only. If `\address{}` is
+  used at all, it is `City, ST` — never a street address.
+- **Dates** — `Mon YYYY` or `YYYY`, reverse-chronological. (The ASCII-hyphen rule under
+  "Date fields must be ASCII ranges" still applies.)
+- **Section order** — Experience before Education for anyone with real work history;
+  Education first only for a current student or someone under a year out. See "Recommended
+  Section Order".
+- **References** — "Available upon request." Never list names on the résumé.
+- Spelling and terminology are US (e.g. "Master's", not "MSc", if that's how the school
+  styles it; "GPA" not "grade").
+
+The **cover letter** is optional for many US tech applications but still produced by
+`/apply`; US cover-letter conventions live in `06-cover-letter-templates.md`.
+
 ## Template: LaTeX moderncv (Banking Style)
 
 All CVs use the moderncv LaTeX package with the "banking" style and "blue" color scheme.
@@ -20,12 +47,14 @@ All CVs use the moderncv LaTeX package with the "banking" style and "blue" color
 cd cv && lualatex -interaction=nonstopmode main_<company>_<role>.tex
 ```
 
-Expected output: `Output written on main_<company>_<role>.pdf (2 pages, ...)`. Any page count other than 2 is a failure that must be fixed before presenting to the user.
+Expected output: `Output written on main_<company>_<role>.pdf (N pages, ...)` where **N is the
+profile's `Resume length`** (1 or 2). Any other page count is a failure that must be fixed
+before presenting to the user — see "Page budget" and the compile loop below.
 
 ## Document Structure
 
 ```latex
-\documentclass[11pt,a4paper,sans]{moderncv}
+\documentclass[11pt,letterpaper,sans]{moderncv}   % US Letter — do not switch to a4paper
 \moderncvstyle{banking}
 \moderncvcolor{blue}
 
@@ -63,9 +92,10 @@ Expected output: `Output written on main_<company>_<role>.pdf (2 pages, ...)`. A
 
 % Personal data
 \name{[FIRST_NAME]}{[LAST_NAME]}
-% If you have no address to list, DELETE this whole line. \address{}{}{} fails
-% with "There's no line here to end" on every moderncv version.
-\address{[YOUR_ADDRESS]}{}{}
+% US résumé: city + state only, never a street address. If you'd rather list
+% nothing, DELETE this whole line — \address{}{}{} fails with "There's no line
+% here to end" on every moderncv version.
+\address{[City, ST]}{}{}
 \phone[mobile]{[YOUR_PHONE]}
 \email{[YOUR_EMAIL]}
 \extrainfo{\href{[YOUR_LINKEDIN_URL]}{LinkedIn}, \href{[YOUR_GITHUB_URL]}{GitHub}}
@@ -237,13 +267,19 @@ Related trap: a bullet whose text begins with a literal `[` must be braced - `\i
 After writing the CV and before presenting to the user, always compile and visually inspect the PDF. Iterate until the layout is clean. Workflow:
 
 1. Run `lualatex -interaction=nonstopmode main_<company>_<role>.tex`
-2. Check the output page count: must be exactly 2
-3. Read the PDF via the Read tool and visually inspect both pages
-4. Check for **orphaned entries**: a `\cventry` title line must never sit alone at the bottom of page 1 with its bullets on page 2
+2. Check the output page count: it must equal the profile's **`Resume length`** (1 or 2).
+   A 1-page résumé that spills a few lines onto page 2, or a 2-page résumé that runs to 3,
+   fails here.
+3. Read the PDF via the Read tool and visually inspect every page
+4. Check for **orphaned entries**: a `\cventry` title line must never sit alone at the bottom of a page with its bullets on the next
 
 ### Fixing common page-break problems
 
-**Problem: entry title on page 1, bullets orphaned to page 2**
+The worked examples below describe the 2-page case. For a **1-page résumé**, read "page 1"
+as "the page" and "spills to page 2" as "spills at all" — the fixes (`\needspace`,
+`\enlargethispage`, then relevance-weighted cuts) are identical, just one page earlier.
+
+**Problem: entry title at the bottom of a page, bullets orphaned to the next**
 Add `\needspace{5\baselineskip}` immediately before the problematic `\cventry`:
 ```latex
 \needspace{5\baselineskip}
@@ -304,23 +340,31 @@ Two independent causes, both easy to avoid:
 
 **Add this to the step 5d checks**: after extracting the text layer, confirm every experience entry shows a start *and* an end separated by an ASCII hyphen. Because the failure is silent and invisible in the PDF, the candidate otherwise discovers it only while filling in the application form.
 
-## Page Budget - Hard 2-Page Limit
+## Page budget
 
-The CV **must** fit on exactly 2 pages when compiled. Use these content limits as a guide:
+The résumé **must** compile to exactly the profile's **`Resume length`** (`CLAUDE.md`
+Identity) — no spill, no padding. Use these content limits as a guide:
 
-| Section | Max budget |
-|---------|-----------|
-| Profile statement | 3-4 lines |
-| Skills | 5 items, each 1-2 lines |
-| Most recent role | 4-5 bullets |
-| Previous role | 2-3 bullets |
-| Older roles | 2 bullets (1 line each) |
-| Education | 2-3 entries |
-| Publications | 2-3 entries |
-| Awards | 3 entries, single line each |
-| References | "Available upon request." (single line) |
+| Section | 1-page budget | 2-page budget |
+|---------|---------------|---------------|
+| Profile / summary | 2-3 lines, or omit | 3-4 lines |
+| Skills | 3-4 lines total | 5 items, each 1-2 lines |
+| Most recent role | 3-4 bullets | 4-5 bullets |
+| Previous role | 2-3 bullets | 2-3 bullets |
+| Older roles | 1-2 bullets, or title line only | 2 bullets (1 line each) |
+| Projects | 1-2, if they beat a weak role bullet | 2-3 |
+| Education | degree, school, grad date; coursework only if new grad | 2-3 entries |
+| Publications | omit unless the role is research | 2-3 entries |
+| Awards | 1-2 lines, if relevant | 3 entries, single line each |
+| References | "Available upon request." (single line) | same |
 
-**If in doubt, cut rather than squeeze.** Reducing `\vspace` or geometry scale to force-fit content makes the CV look cramped.
+**1-page discipline:** a new grad's page is Education + one or two internships/projects +
+Skills. Cut a summary before cutting a bullet with a metric. Older, unrelated coursework and
+a long skills list are the first things to go.
+
+**If in doubt, cut rather than squeeze.** Reducing `\vspace` or geometry scale to force-fit
+content makes the résumé look cramped — and on a 1-page résumé a reviewer reads "couldn't
+edit" into it.
 
 ## Relevance-weighted cutting (the right way to shrink a CV)
 
@@ -347,25 +391,38 @@ Cut the lowest-total-score line first, regardless of which section it sits in.
 
 - Do not mechanically cut from the bottom of a static section list without checking relevance. "Cut the oldest role first" is wrong if that role is literally about the skill the posting asks for.
 - Do not cut the one concrete example the cover letter leans on. Relevance is measured against the cover letter you wrote, not just the job posting — interviewers will have read both.
-- Do not cut to fit if the fit is borderline (2.02 pages). Prefer `\enlargethispage{2-3\baselineskip}` on a late section for near-misses; reserve content cuts for genuine overflow (content on page 3 that is more than a single trailing section).
+- Do not cut to fit for a near-miss (a few lines past the target — 1.05 or 2.05 pages). Prefer `\enlargethispage{2-3\baselineskip}` on a late section, or trimming `\vspace` between entries by a point or two; reserve content cuts for genuine overflow (more than a single trailing section past the target page).
 
 ## Recommended Section Order
 
-The section order varies by role type:
+The section order varies by role type and career stage:
 
-**For technical / data science / ML roles:**
-1. Profile statement / elevator pitch
+**For technical / data science / ML roles (most candidates):**
+1. Profile statement / summary (optional on a 1-page résumé)
 2. Core competencies / Skills
-3. Professional Experience (reverse chronological)
-4. Education (reverse chronological)
-5. Languages
-6. Publications & Awards
+3. Experience (reverse chronological)
+4. Projects (if they carry weight the roles don't)
+5. Education (reverse chronological)
+6. Publications & Awards (only if relevant to the role)
 7. References
 
-**For domain-specific / specialist roles:**
-1. Profile statement / elevator pitch
+**For a current student or someone under ~1 year out:**
+1. Profile statement / summary (optional)
+2. Education (reverse chronological) — the strongest credential this early
+3. Skills
+4. Experience — internships, research, TA/lab roles
+5. Projects
+6. Awards
+7. References
+
+**For domain-specific / specialist roles where the degree is the gate:**
+1. Profile statement
 2. Core competencies / Skills
-3. Education (reverse chronological) - credentials are a key qualifier
-4. Professional Experience (reverse chronological)
+3. Education (reverse chronological) — credentials are a key qualifier
+4. Experience (reverse chronological)
 5. Publications & Awards
 6. References
+
+US convention: **Experience before Education** once there's real work history. Put
+Education first only in the two cases above. "Languages" is a section only when a language
+other than English is job-relevant — not a default.
