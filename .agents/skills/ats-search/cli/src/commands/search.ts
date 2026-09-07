@@ -2,20 +2,25 @@ import { readFile } from "node:fs/promises";
 import { CONNECTORS } from "../connectors/index.js";
 import {
   CompanyListError,
+  matchThreshold,
   matches,
   parseCompanyCsv,
   pool,
+  scoreQuery,
   writeError,
   type AtsType,
   type Company,
   type CompanyError,
   type Filters,
+  type MatchMode,
   type Posting,
 } from "../helpers.js";
 
 export interface SearchOpts {
   companiesFile: string;
   query?: string;
+  matchMode: MatchMode; // how strict the client-side title match is (default "fuzzy")
+  minMatch?: number; // explicit 0..1 keep-threshold; overrides matchMode
   location?: string;
   remote?: "remote" | "hybrid" | "onsite";
   jobage?: number;
@@ -101,19 +106,32 @@ export async function runSearch(opts: SearchOpts): Promise<number> {
   });
 
   const filters: Filters = {
-    query: opts.query,
     location: opts.location,
     remote: opts.remote,
     jobageDays: opts.jobage,
   };
 
+  // Hard gates first (location / remote / age), then a *lenient* query score.
+  // The threshold is deliberately low at this stage: /scrape casts wide and
+  // /rank does the deep title/JD fit analysis — a real role must not be dropped
+  // here just because its title words differ from the query's.
+  const threshold =
+    opts.minMatch !== undefined ? opts.minMatch : matchThreshold(opts.matchMode);
+
   let all = perCompany.flat().filter((p) => matches(p, filters));
+  if (opts.query) {
+    all = all
+      .map((p) => ({ ...p, match_score: scoreQuery(p, opts.query!) }))
+      .filter((p) => p.match_score >= threshold);
+  }
 
   all.sort((a, b) => {
     const pr =
       PRIORITY_RANK[priorityBySlug.get(a.slug) ?? "normal"] -
       PRIORITY_RANK[priorityBySlug.get(b.slug) ?? "normal"];
     if (pr !== 0) return pr;
+    const ms = (b.match_score ?? 0) - (a.match_score ?? 0);
+    if (Math.abs(ms) > 0.001) return ms;
     const da = a.date ? Date.parse(a.date) : 0;
     const db = b.date ? Date.parse(b.date) : 0;
     return db - da;
@@ -147,6 +165,7 @@ export async function runSearch(opts: SearchOpts): Promise<number> {
             page: opts.page,
             total,
             companies: selected.length,
+            ...(opts.query ? { match: opts.minMatch !== undefined ? `min-match ${opts.minMatch}` : opts.matchMode } : {}),
             errors,
             notes,
           },
@@ -162,24 +181,18 @@ export async function runSearch(opts: SearchOpts): Promise<number> {
 
 function renderTable(rows: Omit<Posting, "description">[]): string {
   if (rows.length === 0) return "No results.";
-  const w = {
-    ats: 10,
-    title: 40,
-    company: 20,
-    loc: 22,
-    date: 10,
+  const scored = rows.some((r) => r.match_score !== undefined);
+  const w = { m: 5, ats: 10, title: 40, company: 20, loc: 22, date: 10 };
+  const line = (c: string[]) => {
+    const cells = scored
+      ? [c[0]!.padEnd(w.m), c[1]!.padEnd(w.ats), c[2]!.slice(0, w.title).padEnd(w.title), c[3]!.slice(0, w.company).padEnd(w.company), c[4]!.slice(0, w.loc).padEnd(w.loc), c[5]!]
+      : [c[1]!.padEnd(w.ats), c[2]!.slice(0, w.title).padEnd(w.title), c[3]!.slice(0, w.company).padEnd(w.company), c[4]!.slice(0, w.loc).padEnd(w.loc), c[5]!];
+    return cells.join("  ");
   };
-  const line = (c: string[]) =>
-    [
-      c[0]!.padEnd(w.ats),
-      c[1]!.slice(0, w.title).padEnd(w.title),
-      c[2]!.slice(0, w.company).padEnd(w.company),
-      c[3]!.slice(0, w.loc).padEnd(w.loc),
-      c[4]!,
-    ].join("  ");
-  const header = line(["ATS", "TITLE", "COMPANY", "LOCATION", "DATE"]);
+  const header = line(["MATCH", "ATS", "TITLE", "COMPANY", "LOCATION", "DATE"]);
   const body = rows.map((r) =>
     line([
+      r.match_score !== undefined ? r.match_score.toFixed(2) : "",
       r.ats,
       r.title,
       r.company,
@@ -195,7 +208,7 @@ function renderPlain(rows: Omit<Posting, "description">[]): string {
   return rows
     .map((r) =>
       [
-        r.title,
+        `${r.match_score !== undefined ? `[${r.match_score.toFixed(2)}] ` : ""}${r.title}`,
         `  ${r.company} · ${r.location ?? "—"}${r.remote ? " · remote" : ""} · ${(r.date ?? "—").slice(0, 10)}`,
         `  id: ${r.id}`,
         `  ${r.url}`,

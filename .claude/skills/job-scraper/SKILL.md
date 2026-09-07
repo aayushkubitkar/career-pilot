@@ -70,7 +70,19 @@ For each **enabled** portal skill:
 4. Cap results to ~20 per call using the portal's limit flag.
 5. Use `--format json` for machine-readable output.
 
-Run all portal CLI calls in parallel where possible using the Agent tool. Collect all `results` arrays into a single pool for Step 2, keeping each result tagged with its source portal skill (for Step 2 `detail` lookups).
+**Cast wide, filter later.** This is the discovery stage — its job is to *not miss* a real
+role, not to pre-judge fit. Where a portal scores its results (`ats-search` emits a
+`match_score` and defaults to lenient `fuzzy` matching), keep the lenient default and carry
+the score through; do **not** pass `--match strict` or a high `--min-match` here. A title
+that doesn't contain the query's exact words can still be the role (a "Transaction Risk
+Decisioning" PM for a "fraud" query) — `/rank` Step 3 does the deep title/JD fit analysis.
+Persist `match_score` into `seen_jobs.json` (Step 4) as a hint for `/rank`, never as a veto.
+
+**LinkedIn rate-limits hard** — run `linkedin-search` calls **serially with a short delay**
+(≈8–12 s between calls), not in the parallel Agent fan-out. A throttled call returns an
+empty result set with exit 0 (no error), so parallel LinkedIn calls silently lose results.
+
+Run the other portal CLI calls in parallel where possible using the Agent tool. Collect all `results` arrays into a single pool for Step 2, keeping each result tagged with its source portal skill (for Step 2 `detail` lookups).
 
 If a CLI tool exits with a non-zero code, log the error message and continue — do not abort the whole search.
 
@@ -150,6 +162,7 @@ For each new job, do a rapid fit check (NOT the full evaluation from `04-job-eva
       "posted_date": "YYYY-MM-DD" | null,
       "deadline": "YYYY-MM-DD" | null,
       "fit": "high/medium/low",
+      "match_score": 0.0,
       "status": "new/skipped/ranked/expired",
       "portal": "<source portal skill, e.g. jobindex-search>",
       "source": "cli/websearch"
@@ -159,6 +172,14 @@ For each new job, do a rapid fit check (NOT the full evaluation from `04-job-eva
 ```
 
 The `portal` field records which CLI skill produced the job (results are already tagged per portal in Step 1b - persist that tag here). Entries written before this field existed lack it; the health check (Step 4.75) attributes those by matching the URL's domain against each portal's base URL, so do not backfill.
+
+`match_score` (0.0–1.0) is the portal's own lenient title-relevance score for the query
+that found the job (`ats-search` emits it; other portals may not — omit the key when
+absent, never fake it). It is a **hint for `/rank`'s Step 3 triage, not a fit verdict** — a
+0.2 here just means "this is a product role but the query's exact topic words aren't in the
+title", which is exactly the case `/rank` exists to judge. Keep the highest score seen
+across queries when the same job is found more than once. Never filter a job out of the
+presentation on `match_score` alone.
 
 The `source` field records which mechanism produced the entry: `cli` for Step 1b portal-CLI output, `websearch` for the Step 1c fallback. This is what keeps a ghost-job report diagnosable after the run's summary is gone: a stored entry whose URL later resolves to nothing (or to a different job) reads very differently depending on whether it came from live CLI output or from a search index that can be weeks stale - and a presented job with no entry here at all points at fabrication, which Rule 1 forbids. Entries written before this field existed lack it; never backfill it - the mechanism was not recorded.
 

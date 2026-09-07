@@ -58,8 +58,18 @@ The company list is companies.csv next to this skill (name,ats,slug[,priority]).
 Copy companies.example.csv to companies.csv and edit it.
 
 SEARCH FLAGS
-  --query, -q <text>       Keywords — every word must appear in the job title (case-insensitive).
-  --location, -l <text>    Substring match on the posting location (case-insensitive).
+  --query, -q <text>       Keywords, matched LENIENTLY against the title/team/snippet and
+                           scored 0..1 (see --match). A posting is kept unless the query
+                           named a role type the title clearly isn't — so a
+                           "Transaction Risk Decisioning" PM still shows for -q "product
+                           manager fraud". Results carry a match_score; sort/filter on it
+                           downstream (this is the /scrape-wide, /rank-deep split).
+  --match <mode>           fuzzy (default) | strict | any.
+                           fuzzy  = keep any role-type match, ranked by topic-word overlap.
+                           strict = keep only titles covering every topic word.
+                           any    = keep on a single topic-word (or stem) hit.
+  --min-match <0..1>       Explicit keep-threshold on match_score; overrides --match.
+  --location, -l <text>    Token-overlap match on the posting location; remote always passes.
   --remote <mode>          remote | hybrid | onsite.
   --jobage <days>          Drop postings older than N days (postings with no date are kept).
   --ats <type>             Restrict to one ATS: ${ATS_TYPES.join(" | ")}.
@@ -75,8 +85,9 @@ DETAIL
              Greenhouse / Lever / Ashby / SmartRecruiters job-board URL.
 
 EXAMPLES
-  bun run src/cli.ts search -q "software engineer" --jobage 14 --format table
+  bun run src/cli.ts search -q "product manager fraud risk" --jobage 30 --format table
   bun run src/cli.ts search -q "backend" -l "New York" --priority high
+  bun run src/cli.ts search -q "product manager payments" --match strict --format table
   bun run src/cli.ts search --ats ashby --remote remote --format table
   bun run src/cli.ts detail lever:leverdemo:681fbc53-1e34-4a46-8677-3a78118674eb --format plain
 
@@ -88,7 +99,7 @@ postings; SmartRecruiters identifiers are case-sensitive (e.g. BoschGroup).
 
 const KNOWN_FLAGS: Record<string, Set<string>> = {
   search: new Set([
-    "query", "location", "remote", "jobage", "ats", "company", "priority",
+    "query", "match", "min-match", "location", "remote", "jobage", "ats", "company", "priority",
     "page", "limit", "format", "companies-file", "help", "h",
   ]),
   detail: new Set(["format", "companies-file", "help", "h"]),
@@ -169,9 +180,30 @@ async function main(): Promise<number> {
       return 1;
     }
 
+    const matchMode = typeof flags.match === "string" ? flags.match.toLowerCase() : "fuzzy";
+    if (!["fuzzy", "strict", "any"].includes(matchMode)) {
+      process.stderr.write(
+        JSON.stringify({ error: `--match must be fuzzy|strict|any, got "${flags.match}"`, code: "BAD_ARG" }) + "\n",
+      );
+      return 1;
+    }
+    let minMatch: number | undefined;
+    if (flags["min-match"] !== undefined) {
+      const v = typeof flags["min-match"] === "string" ? Number(flags["min-match"]) : NaN;
+      if (!Number.isFinite(v) || v < 0 || v > 1) {
+        process.stderr.write(
+          JSON.stringify({ error: `--min-match must be a number 0..1, got "${flags["min-match"]}"`, code: "BAD_ARG" }) + "\n",
+        );
+        return 1;
+      }
+      minMatch = v;
+    }
+
     const opts: SearchOpts = {
       companiesFile,
       query: typeof flags.query === "string" ? flags.query : undefined,
+      matchMode: matchMode as SearchOpts["matchMode"],
+      minMatch,
       location: typeof flags.location === "string" ? flags.location : undefined,
       remote: remote as SearchOpts["remote"],
       jobage: flags.jobage ? parseInt(flags.jobage as string, 10) : undefined,

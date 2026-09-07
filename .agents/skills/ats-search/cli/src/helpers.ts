@@ -51,6 +51,8 @@ export interface Posting {
   url: string;
   comp: string | null;
   deadline: string | null;
+  /** 0..1 relevance to `--query` (present only when a query was given). See scoreQuery(). */
+  match_score?: number;
   snippet?: string | null;
   description?: string | null;
 }
@@ -179,30 +181,34 @@ export function parseCompanyCsv(text: string): Company[] {
 // ---------------------------------------------------------------------------
 
 export interface Filters {
-  query?: string; // every whitespace token must appear in the title (case-insensitive)
-  location?: string; // case-insensitive substring of the posting location
+  // `query` is scored, not gated — see scoreQuery(). Hard gates below.
+  location?: string; // token-overlap match against the posting location (remote always passes)
   remote?: "remote" | "hybrid" | "onsite";
   jobageDays?: number; // drop postings older than N days (postings with no date are kept)
 }
 
-/** Does `p` pass every active filter? */
+const tokenize = (s: string): string[] => (s.toLowerCase().match(/[a-z0-9]+/g) ?? []);
+const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Hard gates: location, remote, job age. `query` is scored separately (scoreQuery). */
 export function matches(p: Posting, f: Filters): boolean {
-  if (f.query) {
-    const hay = p.title.toLowerCase();
-    for (const tok of f.query.toLowerCase().split(/\s+/).filter(Boolean)) {
-      if (!hay.includes(tok)) return false;
-    }
-  }
   if (f.location) {
     const loc = (p.location ?? "").toLowerCase();
-    if (!loc.includes(f.location.toLowerCase())) return false;
+    const remoteOk = p.remote === true || /\bremote\b/.test(loc);
+    const qToks = tokenize(f.location).filter((t) => !["remote", "hybrid", "onsite", "us", "usa"].includes(t));
+    // Pass if the posting is remote, or shares a meaningful location token
+    // ("new york" matches "New York, NY"), or the raw substring is present.
+    const overlap =
+      qToks.length === 0 ||
+      loc.includes(f.location.toLowerCase()) ||
+      qToks.some((t) => new RegExp(`\\b${escapeRe(t)}`).test(loc));
+    if (!overlap && !remoteOk) return false;
   }
   if (f.remote) {
     const locSaysRemote = /\bremote\b/i.test(p.location ?? "");
     const locSaysHybrid = /\bhybrid\b/i.test(p.location ?? "");
     if (f.remote === "remote" && !(p.remote === true || locSaysRemote)) return false;
     if (f.remote === "onsite" && (p.remote === true || locSaysRemote)) return false;
-    // Hybrid is only reliably knowable from the location text across these ATSes.
     if (f.remote === "hybrid" && !locSaysHybrid) return false;
   }
   if (f.jobageDays !== undefined && p.date) {
@@ -210,6 +216,85 @@ export function matches(p: Posting, f: Filters): boolean {
     if (Number.isFinite(ageMs) && ageMs > f.jobageDays * 86400_000) return false;
   }
   return true;
+}
+
+// ---------------------------------------------------------------------------
+// Fuzzy query matching — lenient at the /scrape stage, so no real role is
+// dropped for a wording mismatch (a "Transaction Risk Decisioning" PM is not
+// titled "...Fraud"). scoreQuery() returns 0..1; /rank does the deep filtering.
+// ---------------------------------------------------------------------------
+
+export type MatchMode = "fuzzy" | "strict" | "any";
+
+// Query words that name the *role* — the title must plausibly be this kind of role.
+const ROLE_CORE = new Set(["product", "manager", "mgr", "management", "pm", "owner"]);
+// Query words that name a *level* — never gate on these (they cause false negatives:
+// someone open to "PM or Senior PM" must still see a "Senior" posting for `-q "product manager"`).
+const SENIORITY = new Set([
+  "senior", "sr", "junior", "jr", "staff", "principal", "lead", "associate", "group",
+  "head", "vp", "director", "entry", "mid", "level", "i", "ii", "iii", "iv", "apm", "gpm", "tpm",
+]);
+// Titles that are a product role by words but usually a different function.
+const OFF_FUNCTION = /\b(marketing|design(er)?|program|engineering|research|community|operations|ops|sales|data|content|brand|growth marketing)\b/;
+
+/** Light stemmer: strip a common English suffix so "payments" ~ "payment", "decisioning" ~ "decision". */
+export function stemLite(tok: string): string {
+  const s = tok.replace(/(ings?|ed|es|s)$/, "");
+  return s.length >= 3 ? s : tok;
+}
+
+function hayHasTopic(hay: string, tok: string): boolean {
+  if (hay.includes(tok)) return true;
+  const stem = stemLite(tok);
+  return stem !== tok && new RegExp(`\\b${escapeRe(stem)}`).test(hay);
+}
+
+/**
+ * Score a posting against `query`, 0..1.
+ * - 0        : the query named a role type and the title isn't that role
+ * - ~0.35-1  : role matches; value scales with how many *topic* words are present
+ *              in title / team / snippet (stemmed). Off-function titles
+ *              ("Product Marketing Manager") are penalised, not excluded.
+ * - 1        : query had no topic words (e.g. "senior product manager"), role matches
+ */
+export function scoreQuery(p: Posting, query: string): number {
+  const q = tokenize(query);
+  if (q.length === 0) return 1;
+  const roleToks = q.filter((t) => ROLE_CORE.has(t));
+  const topicToks = [...new Set(q.filter((t) => !ROLE_CORE.has(t) && !SENIORITY.has(t)))];
+  const title = p.title.toLowerCase();
+
+  if (roleToks.length > 0) {
+    const wantsProduct = roleToks.includes("product");
+    const wantsMgr = roleToks.some((t) => t !== "product");
+    const titleHasProduct = /\bproduct\b/.test(title);
+    const titleHasMgr = /\b(manager|mgr|management|pm|owner|lead)\b/.test(title) || /\bhead of product\b/.test(title);
+    if (wantsProduct && !titleHasProduct) return 0;
+    if (wantsMgr && !titleHasMgr) return 0;
+  }
+
+  const hay = [p.title, p.team ?? "", p.snippet ?? ""].join(" ").toLowerCase();
+  let score: number;
+  if (topicToks.length === 0) {
+    score = 1; // query was only role/level words
+  } else {
+    const hits = topicToks.filter((t) => hayHasTopic(hay, t)).length;
+    // 0 topic hits but a genuine PM title still scores 0.2 — kept by `fuzzy`
+    // (nothing left behind), dropped by `any`/`strict`. ≥1 hit lifts it well clear.
+    score = hits === 0 ? 0.2 : 0.4 + 0.6 * (hits / topicToks.length);
+  }
+  if (OFF_FUNCTION.test(title)) score *= 0.5;
+  return Math.round(score * 100) / 100;
+}
+
+/**
+ * Keep-threshold per mode:
+ *  - fuzzy  (default): 0.01 — every genuine PM role is kept; sort/filter on match_score
+ *  - any            : 0.36 — role match plus at least one topic word (or stem)
+ *  - strict         : full topic coverage only
+ */
+export function matchThreshold(mode: MatchMode): number {
+  return mode === "strict" ? 0.999 : mode === "any" ? 0.36 : 0.01;
 }
 
 // ---------------------------------------------------------------------------

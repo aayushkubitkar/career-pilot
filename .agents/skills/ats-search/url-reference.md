@@ -137,5 +137,12 @@ No compensation or deadline in the API.
   20s timeout, exp backoff (max 5 retries) on 429/5xx, `null` on 404, throw on hard failure.
 - Greenhouse/Lever/Ashby take no keyword or date parameter — `--query`, `--location`,
   `--jobage`, `--remote` are applied client-side after fetching each board in full.
-  SmartRecruiters takes `q` (server-side) + `country`/`city`; the client-side filters still
-  run on top for consistency.
+  SmartRecruiters takes `q` (server-side) + `country`/`city`; the client-side scoring still
+  runs on top for consistency.
+- **Query matching is lenient by design** (`cli/src/helpers.ts` → `scoreQuery`): tokens are
+  split into ROLE (product/manager/pm/…), SENIORITY (never gates), and TOPIC words. The
+  title must plausibly be the role type; then `match_score` = `0.4 + 0.6·(topic hits /
+  topic words)` with light stemming, `0.2` for a role match with zero topic hits, `1.0`
+  when the query had no topic words. `OFF_FUNCTION` titles (Product **Marketing** Manager,
+  etc.) are halved, not excluded. `--match` sets the keep-threshold (fuzzy 0.01 / any 0.36
+  / strict full-coverage); `--min-match` overrides it. `/rank` does the real fit call.

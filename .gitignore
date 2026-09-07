@@ -116,3 +116,6 @@ company_research/*.json
 
 # Brainstorm mockups (superpowers visual companion) - never ship
 .superpowers/
+
+# ats-search: companies.example.csv is the shipped starter; companies.csv is your working copy
+.agents/skills/ats-search/companies.csv

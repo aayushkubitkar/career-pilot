@@ -49,3 +49,20 @@ Western Digital,smartrecruiters,WesternDigital,low
 Experian,smartrecruiters,Experian,low
 Avery Dennison,smartrecruiters,AveryDennison,low
 Cricut,smartrecruiters,Cricut,low
+
+# --- Consumer fintech / platforms (payments, credit, fraud, trust & safety) ---
+Affirm,greenhouse,affirm,normal
+Chime,greenhouse,chime,normal
+SoFi,greenhouse,sofi,normal
+Block,greenhouse,block,normal
+Robinhood,greenhouse,robinhood,normal
+Coinbase,greenhouse,coinbase,normal
+Adyen,greenhouse,adyen,normal
+Wise,greenhouse,wise,normal
+Betterment,greenhouse,betterment,normal
+Gemini,greenhouse,gemini,normal
+Airbnb,greenhouse,airbnb,normal
+Instacart,greenhouse,instacart,normal
+Lyft,greenhouse,lyft,normal
+Discord,greenhouse,discord,normal
+Roblox,greenhouse,roblox,normal

@@ -6,7 +6,9 @@ import {
   matches,
   parseCompanyCsv,
   parseId,
+  scoreQuery,
   snippetOf,
+  stemLite,
   type Posting,
 } from "../src/helpers";
 
@@ -78,15 +80,11 @@ describe("matches — client-side filters", () => {
     ...o,
   });
 
-  test("query: every token must appear in the title", () => {
-    expect(matches(p(), { query: "backend engineer" })).toBe(true);
-    expect(matches(p(), { query: "Senior BACKEND" })).toBe(true);
-    expect(matches(p(), { query: "backend rust" })).toBe(false);
-  });
-
-  test("location: case-insensitive substring", () => {
+  test("location: token overlap, remote always passes", () => {
     expect(matches(p(), { location: "new york" })).toBe(true);
+    expect(matches(p(), { location: "New York, NY" })).toBe(true);
     expect(matches(p(), { location: "berlin" })).toBe(false);
+    expect(matches(p({ location: "Remote - US", remote: true }), { location: "Seattle" })).toBe(true);
   });
 
   test("remote flag and remote-in-location both satisfy --remote remote", () => {
@@ -104,6 +102,71 @@ describe("matches — client-side filters", () => {
     const old = p({ date: new Date(Date.now() - 40 * 86400_000).toISOString() });
     expect(matches(old, { jobageDays: 14 })).toBe(false);
     expect(matches(p({ date: null }), { jobageDays: 14 })).toBe(true);
+  });
+});
+
+describe("scoreQuery — lenient fuzzy title matching", () => {
+  const p = (title: string, extra: Partial<Posting> = {}): Posting => ({
+    id: "greenhouse:acme:1", ats: "greenhouse", slug: "acme", externalId: "1",
+    title, company: "Acme", team: null, location: null, remote: null, date: null,
+    url: "https://x", comp: null, deadline: null, ...extra,
+  });
+
+  test("a real PM role is NOT dropped for a wording mismatch", () => {
+    // The bug this fixes: `-q "product manager fraud"` returned 0 because Chime
+    // titles the role "Transaction Risk Decisioning", not "...Fraud".
+    const chime = p("Product Manager, Transaction Risk Decisioning");
+    expect(scoreQuery(chime, "product manager fraud")).toBeGreaterThan(0);
+    // ...and "risk" IS in the title, so it scores higher than a pure guess
+    expect(scoreQuery(p("Product Manager, Transaction Risk Decisioning"), "product manager risk"))
+      .toBeGreaterThan(scoreQuery(chime, "product manager fraud"));
+  });
+
+  test("full topic coverage scores 1", () => {
+    expect(scoreQuery(p("Senior Product Manager, Payments Risk"), "product manager payments risk")).toBe(1);
+  });
+
+  test("seniority words never gate — a Senior posting still matches `product manager`", () => {
+    expect(scoreQuery(p("Senior Product Manager, Checkout"), "product manager")).toBe(1);
+    expect(scoreQuery(p("Product Manager II, Growth"), "senior product manager")).toBe(1);
+  });
+
+  test("role gate: a non-PM title scores 0 for a PM query", () => {
+    expect(scoreQuery(p("Software Engineer, Payments"), "product manager payments")).toBe(0);
+    expect(scoreQuery(p("Data Scientist, Fraud"), "product manager fraud")).toBe(0);
+  });
+
+  test("off-function titles are penalised, not excluded", () => {
+    const mktg = scoreQuery(p("Product Marketing Manager, Payments"), "product manager payments");
+    const real = scoreQuery(p("Product Manager, Payments"), "product manager payments");
+    expect(mktg).toBeGreaterThan(0);
+    expect(mktg).toBeLessThan(real);
+  });
+
+  test("stemming: 'payments' matches 'payment', 'decisioning' matches 'decision'", () => {
+    expect(scoreQuery(p("Product Manager, Payment Systems"), "product manager payments")).toBe(1);
+    expect(scoreQuery(p("Product Manager, Risk Decisioning"), "product manager decision")).toBe(1);
+  });
+
+  test("team and snippet count toward topic hits, not just the title", () => {
+    const withTeam = p("Product Manager, Core Experience", { team: "Trust & Safety" });
+    expect(scoreQuery(withTeam, "product manager trust safety")).toBeGreaterThan(
+      scoreQuery(p("Product Manager, Core Experience"), "product manager trust safety"),
+    );
+  });
+
+  test("empty query -> 1", () => {
+    expect(scoreQuery(p("Anything"), "")).toBe(1);
+  });
+});
+
+describe("stemLite", () => {
+  test("strips common suffixes, keeps short words", () => {
+    expect(stemLite("payments")).toBe("payment");
+    expect(stemLite("disputes")).toBe("disput");
+    expect(stemLite("decisioning")).toBe("decision");
+    expect(stemLite("risk")).toBe("risk");
+    expect(stemLite("is")).toBe("is"); // too short to stem
   });
 });
 

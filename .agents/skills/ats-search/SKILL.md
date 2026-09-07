@@ -22,9 +22,10 @@ applicant-tracking systems. **Public, keyless JSON APIs** — no scraping, no au
 **zero runtime dependencies** (runs with just `bun`).
 
 Unlike a market-wide job board, an ATS board belongs to **one company**, so this skill
-works off a company list you maintain: `companies.csv` next to this skill
-(`name,ats,slug[,priority]`). It ships pre-populated with ~30 well-known US companies;
-edit it to match your search. `companies.example.csv` is the annotated reference.
+works off a company list you maintain: **copy `companies.example.csv` (~45 well-known US
+companies — tech + consumer fintech) to `companies.csv`** next to this skill and edit it to
+match your search. `companies.csv` is your local working copy (gitignored); the `.example`
+is the shipped starter. Format: `name,ats,slug[,priority]`.
 
 Greenhouse, Lever, and Ashby skew startup/tech; SmartRecruiters skews large enterprise
 and industrial (Bosch, Western Digital, Experian, Avery Dennison, …) — narrower US-tech
@@ -69,9 +70,22 @@ The run continues either way.
 bun run .agents/skills/ats-search/cli/src/cli.ts search [flags]
 ```
 
-- `--query, -q <text>` — every word must appear in the job **title** (case-insensitive).
-  These APIs have no server-side keyword search; filtering is client-side on the title.
-- `--location, -l <text>` — case-insensitive substring of the posting location.
+- `--query, -q <text>` — keywords, matched **leniently** and scored `0..1` against the
+  title + team + snippet (light stemming, so "payments" ~ "payment", "decisioning" ~
+  "decision"). A posting is kept unless the query named a role type the title clearly is
+  **not** (a "Software Engineer" is dropped for `-q "product manager …"`). This is the
+  **/scrape-wide, /rank-deep** split: nothing real is dropped here for a wording mismatch —
+  a "Transaction Risk Decisioning" PM still shows for `-q "product manager fraud"`, at a
+  low score — and `/rank` does the deep title/JD fit analysis. Seniority words
+  (`senior`, `staff`, `principal`, …) never gate — someone open to "PM or Senior PM" must
+  still see a "Senior" posting for `-q "product manager"`.
+- `--match <mode>` — `fuzzy` (default) | `strict` | `any`.
+  `fuzzy` keeps every role-type match, ranked by topic-word overlap. `strict` keeps only
+  titles that cover **every** topic word. `any` keeps a posting on a **single** topic-word
+  (or stem) hit — the useful middle ground for a domain shortlist.
+- `--min-match <0..1>` — explicit keep-threshold on `match_score`; overrides `--match`.
+- `--location, -l <text>` — token-overlap match against the posting location ("New York"
+  matches "New York, NY"); a remote posting always passes.
 - `--remote <mode>` — `remote` | `hybrid` | `onsite`.
 - `--jobage <days>` — drop postings older than N days (postings with no date are kept).
 - `--ats <type>` — restrict to `greenhouse` | `lever` | `ashby` | `smartrecruiters`.
@@ -80,17 +94,18 @@ bun run .agents/skills/ats-search/cli/src/cli.ts search [flags]
 - `--page <n>` (1-indexed) · `--limit, -n <n>` (page size) · `--format json|table|plain`.
 - `--companies-file <path>` — override the company-list location.
 
-For **Greenhouse/Lever/Ashby**, `--query` and `--location` filter client-side (the whole
-board is fetched). For **SmartRecruiters**, `--query` is sent server-side and a company
-searched **without** `--query` is capped at ~150 most-recent postings (its boards can hold
-thousands). Pass a `--query` for useful SmartRecruiters results.
+For **Greenhouse/Lever/Ashby**, the whole board is fetched and `--query` scoring +
+`--location` are applied client-side. For **SmartRecruiters**, `--query` is *also* sent
+server-side (its boards hold thousands) and the client-side score still applies on top; a
+company searched **without** `--query` is capped at ~150 most-recent postings.
 
-Results are sorted by company priority, then newest first. JSON is
-`{ meta: { count, page, total, companies, errors, notes }, results: [...] }`; each result
-has `id, ats, slug, externalId, title, company, team, location, remote, date, url, comp,
-deadline, snippet` (missing values `null`). `date` is the posting's publish date
-(Greenhouse: `first_published` → `updated_at`; SmartRecruiters: `releasedDate`).
-`meta.notes` carries non-fatal signals (a SmartRecruiters company that returned nothing).
+Results are sorted by company priority, then `match_score` (highest first), then newest.
+JSON is `{ meta: { count, page, total, companies, match, errors, notes }, results: [...] }`;
+each result has `id, ats, slug, externalId, title, company, team, location, remote, date,
+url, comp, deadline, match_score` (`0..1`, only when `--query` was given), `snippet`
+(missing values `null`). `date` is the posting's publish date (Greenhouse: `first_published`
+→ `updated_at`; SmartRecruiters: `releasedDate`). `meta.notes` carries non-fatal signals
+(a SmartRecruiters company that returned nothing).
 
 ### Detail
 
@@ -105,17 +120,18 @@ Ashby job-board URL. Returns the full description, `team`, `comp`, and `deadline
 ## Usage examples
 
 ```bash
-# New-grad software roles across the whole list, last 30 days
-bun run .agents/skills/ats-search/cli/src/cli.ts search -q "software engineer" --jobage 30 --format table
+# Domain search — lenient: every PM role is returned, ranked by how well the title
+# covers "risk"/"fraud"/"decisioning". Sort/skim by the MATCH column.
+bun run .agents/skills/ats-search/cli/src/cli.ts search -q "product manager risk fraud decisioning" --jobage 30 --format table
+
+# Tighter domain shortlist — role match + at least one topic word
+bun run .agents/skills/ats-search/cli/src/cli.ts search -q "product manager fraud" --match any --priority high --format table
 
 # Backend roles in NYC at your high-priority companies
 bun run .agents/skills/ats-search/cli/src/cli.ts search -q "backend" -l "New York" --priority high --format table
 
 # Everything remote on Ashby boards
 bun run .agents/skills/ats-search/cli/src/cli.ts search --ats ashby --remote remote --format table
-
-# Just one company
-bun run .agents/skills/ats-search/cli/src/cli.ts search --company anthropic -q "research engineer" --format table
 
 # Full detail for one posting
 bun run .agents/skills/ats-search/cli/src/cli.ts detail ashby:ramp:34413f8d-26bf-4bbc-8ade-eb309a0e2245 --format plain
