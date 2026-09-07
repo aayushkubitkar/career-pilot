@@ -51,6 +51,8 @@ ALLOWED_PERMISSIONS = {
     "Bash(bun run .agents/skills/freehire-search/cli/src/cli.ts:*)",
     # CareerPilot (US adaptation): unified Greenhouse/Lever/Ashby board search.
     "Bash(bun run .agents/skills/ats-search/cli/src/cli.ts:*)",
+    # CareerPilot (US adaptation): Adzuna aggregator search (reads ADZUNA_APP_ID/KEY from env).
+    "Bash(bun run .agents/skills/adzuna-search/cli/src/cli.ts:*)",
     "Bash(python salary_lookup.py:*)",
     "Bash(python3 salary_lookup.py:*)",
     "Bash(python tools/rank_state.py:*)",

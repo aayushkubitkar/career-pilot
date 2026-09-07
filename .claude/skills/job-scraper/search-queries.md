@@ -14,6 +14,10 @@ CareerPilot (US market) ships these **enabled**:
   **Maintain `companies.csv`** — it's your target-company list. `/setup --section search`
   and `/add-portal` can help you grow it; a slug is the handle in
   `job-boards.greenhouse.io/<slug>`, `jobs.lever.co/<slug>`, or `jobs.ashbyhq.com/<slug>`.
+- **`adzuna-search`** — broad US-market aggregator (company sites + boards + recruiters via
+  the Adzuna API). Casts the wide net and surfaces employers not in `companies.csv`. Needs
+  `ADZUNA_APP_ID` / `ADZUNA_APP_KEY` in the repo-root `.env` (free key); `/scrape` skips it
+  cleanly if unset. No per-posting detail — `/scrape` Step 2 WebFetches the result `url`.
 - **`linkedin-search`** — LinkedIn public listings; pass a US location
   (`-l "San Francisco Bay Area"`, `-l "New York, NY"`, `-l "Remote"`). Personal use, low volume.
 - **`freehire-search`** — multi-market tech aggregator; scope with `--region us --country US`.

@@ -35,6 +35,21 @@ git merge v1.8.0                            # adopt a release; resolve conflicts
 CareerPilot's own US-adaptation commits live on `master` on top of the `v1.7.1` tag, so a
 `git merge <newer-tag>` three-way-merges upstream changes around them.
 
+### Local secrets (`.env`)
+
+Some portal skills need an API key. Put them in a **`.env`** at the repo root — it's
+gitignored, and Bun auto-loads it for every `bun run .agents/skills/…` call. Currently:
+
+```
+ADZUNA_APP_ID=…          # adzuna-search — free key at https://developer.adzuna.com
+ADZUNA_APP_KEY=…
+# USAJOBS_API_TOKEN=…    # usajobs-search (planned) — https://developer.usajobs.gov
+# USAJOBS_USER_AGENT=you@example.com
+```
+
+Each skill's `SKILL.md` "Setup" section is the source of truth for what it needs. A skill
+whose key is unset fails cleanly (`code: MISSING_CREDENTIALS`) and `/scrape` skips it.
+
 ## What changes for the US
 
 | Area | Upstream (Denmark) | CareerPilot (US) |
