@@ -75,23 +75,28 @@ across a user-maintained company list beats one skill per ATS.
   location:PositionLocationDisplay, date:PublicationStartDate, url:PositionURI}`.
   Detail adds `UserArea.Details.{JobSummary,MajorDuties,Requirements,Qualifications}`.
 
-### B3. `adzuna-search` skill (broad aggregator)
+### B3. `adzuna-search` skill (broad aggregator) ✅ (2026-09-07, commit 80a033f)
 
-- `GET https://api.adzuna.com/v1/api/jobs/us/search/{page}?app_id=&app_key=&what=&where=&max_days_old=`
-- Credentials: `ADZUNA_APP_ID` + `ADZUNA_APP_KEY` (contract allows a paired key; document
-  both, fail loudly if either is unset). Free tier at developer.adzuna.com.
-- Map `results[]` → `{id, title, company.display_name, location.display_name, created,
-  redirect_url, description}`; carry `salary_min/max` into an optional `comp` field.
+Delivered. Zero-dep bun CLI, `search` + `detail`, `ADZUNA_APP_ID`/`ADZUNA_APP_KEY` from
+env (repo-root `.env`, bun-autoloaded). 20 offline tests, live-verified with the user's key.
+Deviations found in build:
+- **No per-posting endpoint** and search descriptions are truncated to ~200 chars.
+  `detail` returns `{id, url, detail_supported:false, note}` — `/scrape` Step 2 WebFetches
+  the `url` for the body. Documented in SKILL.md + url-reference.md.
+- `comp` surfaced only when `salary_is_predicted === "0"` (posting stated it); Adzuna's ML
+  salary estimates are dropped.
+- Env vars documented in each SKILL.md "Setup" + `CAREERPILOT.md`, not a committed
+  `.env.example` (the repo's `.gitignore` treats `.env.*` as a required-ignore rule).
 
 ### B4. Wire-up
 
-- [x] `.claude/settings.json` + `tools/security_guards.py`: `ats-search` allowlist entry.
-      (`usajobs-search`, `adzuna-search` entries land with B2/B3.)
+- [x] `.claude/settings.json` + `tools/security_guards.py`: `ats-search` + `adzuna-search`
+      allowlist entries. (`usajobs-search` lands with B2.)
 - [x] Danish portals — already `enabled: false` upstream; nothing to do.
 - [x] `.claude/skills/job-scraper/search-queries.md` rewritten for the US (ats-search
-      primary, LinkedIn/freehire kept, Danish off, WebSearch fallback list = US boards).
-- [ ] `.env.example` (new, tracked): `USAJOBS_API_TOKEN`, `USAJOBS_USER_AGENT`,
-      `ADZUNA_APP_ID`, `ADZUNA_APP_KEY` — lands with B2/B3.
+      primary, adzuna + LinkedIn/freehire for breadth, Danish off, WebSearch fallback = US boards).
+- [x] Env-var docs: per-skill `SKILL.md` "Setup" + `CAREERPILOT.md` "Local secrets".
+      No committed `.env.example` (`.gitignore` treats `.env.*` as required-ignore).
 
 **Ships:** `/scrape` searches curated US companies + federal + an aggregator, dedupes into
 `seen_jobs.json` as today, `/rank` and `/apply` consume the results unchanged.
