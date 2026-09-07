@@ -8,7 +8,7 @@ There are three paths into setup. Step 0 picks the right one; all three converge
 
 ## Step 0: Welcome & Choose Path
 
-If `$ARGUMENTS` contains `--section <name>`, skip directly to that section in Path C for an update-only flow. Do not run the path-selection prompt below.
+If `$ARGUMENTS` contains `--section <name>`, skip directly to that section in Path C for an update-only flow. Do not run the path-selection prompt below. `--section workauth` re-runs just Section 1's US work-authorization and résumé-length questions and rewrites those blocks in `CLAUDE.md` / `01-candidate-profile.md` (useful when an OPT date changes or a green card comes through).
 
 Otherwise, first check where this working copy would publish to — **before anything is
 written, not after** (the Step 4 privacy note fires only once every file is already on
@@ -238,6 +238,8 @@ Documents cover skills, experience, education, references, and behavioral signal
 - What excites the user in their next role
 - Deal-breakers and must-haves
 - Languages you work in professionally, with proficiency levels (only if not already extracted from `cv/` or `linkedin/` above) - this feeds the Language Gate in `04-job-evaluation.md`, so ask directly rather than skipping it
+- **US work authorization** (status, needs-sponsorship yes/no, key dates if time-limited) and **résumé length** (1-page / 2-page) — the questions from Path C Section 1's work-authorization and résumé-length items. A résumé and a LinkedIn export almost never state work authorization, so ask directly; the Work Authorization Gate in `04-job-evaluation.md` depends on it.
+- US application-form preferences (Path C Section 8b) — optional demographic self-ID pre-declaration and a target salary range
 - Salary expectations / baseline (optional)
 - Commute or location constraints (if not visible from CV)
 - Job search configuration (use the questions from Path C Section 9 below)
@@ -253,7 +255,7 @@ If the user provides a single CV/resume:
 1. Read the document thoroughly.
 2. Extract all structured information: name, contact, education, experience, skills, languages, publications, awards.
 3. Present a summary of what was extracted.
-4. Ask follow-up questions for gaps (behavioral profile, career goals, deal-breakers, languages and proficiency levels if not already extracted, salary expectations, references).
+4. Ask follow-up questions for gaps (behavioral profile, career goals, deal-breakers, languages and proficiency levels if not already extracted, **US work authorization + résumé length** per Path C Section 1, **US application-form preferences** per Path C Section 8b, salary expectations, references).
 5. Proceed to Step 3 (file generation).
 
 ---
@@ -265,9 +267,25 @@ Walk through each section conversationally. Ask questions naturally, not as a fo
 ### Section 1: Identity & Contact
 Ask about:
 - Full name
-- Location (city, country)
+- Location (city, state — US résumés don't carry a street address)
 - Phone, email, LinkedIn, GitHub
 - What languages they work in professionally, and roughly what level in each (native, fluent, conversational, a CEFR letter like B2 - whatever's natural for them to describe, doesn't need to be precise). Worth explaining why: a posting requiring a language they don't list at all gets auto-excluded later by the Language Gate, while one asking for a higher level in a language they do list gets flagged for their own judgment instead of silently passed or rejected - so it's worth being honest here rather than optimistic.
+- **US work authorization** — capture three things for the Work Authorization block in
+  `CLAUDE.md` / `01-candidate-profile.md`, which the Work Authorization Gate
+  (`04-job-evaluation.md`) reads before scoring any posting:
+  1. **Status** — US citizen / permanent resident (green card) / F-1 OPT / STEM OPT /
+     H-1B / TN / other. Ask directly; don't infer from anything.
+  2. **Will they need visa sponsorship now or in the future?** yes / no. (A citizen or
+     green-card holder is "no". Someone on OPT who'll need H-1B later is "yes" even though
+     they can work now — the gate and the application forms both ask about the future.)
+  3. **Key dates**, only if the status is time-limited — e.g. "OPT valid through 2027-06",
+     "STEM OPT extension filed", a work-authorization start date tied to graduation.
+  Explain why: postings that say "no sponsorship" get filtered out automatically for
+  someone who needs it, and a wrong answer here silently wastes applications or drops
+  good roles.
+- **Résumé length** — 1-page or 2-page. Recommend **1-page** for a current student, a new
+  grad, or roughly under 10 years of experience; 2-page once the experience justifies it.
+  Record as the `Resume length:` line in `CLAUDE.md`.
 - Current employment status
 - Family/commute constraints (if any)
 
@@ -325,6 +343,24 @@ For each reference:
 - Name, title, company, email, phone
 - Relationship to the user
 
+### Section 8b: US application-form preferences (optional)
+US portals ask a demographic / voluntary self-identification section (race/ethnicity,
+gender, veteran status, disability — often federal form CC-305), separate from the
+application and firewalled from the hiring team. `/apply` fills only what the user
+pre-declares here and defaults every other field to "decline to self-identify" — it never
+infers demographics.
+
+- Ask, neutrally and once: "US applications include an optional demographic self-ID
+  section. Do you want me to pre-fill any of those fields (race/ethnicity, gender,
+  veteran status, disability), or decline them all?" Record only what they choose to
+  provide. "Decline all" is a completely normal answer and the default.
+- Also useful for the salary field: a target compensation **range** for their roles and
+  metro (they can revisit it later). `/apply` never supplies prior-salary figures — see
+  `10-us-application-specifics.md`.
+
+Record the answers under a short "Application-form preferences" note in
+`01-candidate-profile.md`.
+
 ### Section 9: Job Search Configuration
 This section generates the search queries that power `/scrape`. Use the information from Sections 1, 4, and 7 to build targeted queries.
 
@@ -350,7 +386,7 @@ This proactive suggestion step helps users discover career paths they might not 
 Once data collection is complete, generate or finish populating the following files. **For Path A**, the seven skill files are already populated by Step A7; check each before writing and skip if its content is no longer placeholder text.
 
 ### 1. Update `CLAUDE.md`
-Replace all `[PLACEHOLDER]` tokens with the user's actual information. Keep the structure, workflow, and verification checklist intact.
+Replace all `[PLACEHOLDER]` tokens with the user's actual information. Keep the structure, workflow, and verification checklist intact. This includes the **Work Authorization** table (status / needs-sponsorship / key dates) and the **Resume length** line in the Identity section — fill both from Section 1; do not leave the table as placeholders (the Work Authorization Gate treats a missing block as "ask the user" on every posting).
 
 ### 2. Populate `01-candidate-profile.md` *(Path B and C; skip if Path A populated it)*
 Write the full candidate profile with structured sections: Identity (including Languages, with levels), Education, Professional Experience, Independent Projects, Technical Skills, Publications, Awards, References.
