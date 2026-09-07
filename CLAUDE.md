@@ -29,6 +29,17 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
   04-job-evaluation.md's Language Gate. -->
 - **CV language:** [YOUR_CV_LANGUAGE] <!-- English unless your market expects otherwise; /setup asks -->
 
+- **Work Authorization (US):**
+  | Field | Value |
+  |-------|-------|
+  | Status | [US citizen / permanent resident (green card) / OPT / STEM OPT / H-1B / TN / other] |
+  | Needs sponsorship now or in the future | [yes / no] |
+  | Key dates (if time-limited) | [e.g. "OPT valid through 2027-06"; "STEM OPT extension filed"; leave blank if not applicable] |
+  <!-- Read by the Work Authorization Gate in 04-job-evaluation.md before any posting is
+  scored. "Needs sponsorship = no" covers citizens, green-card holders, and anyone with a
+  currently-valid work permit that doesn't need employer action. Be exact — a wrong value
+  here silently wastes applications or drops good roles. -->
+
 - **Status:** [YOUR_EMPLOYMENT_STATUS]
 - **LinkedIn headline:** "[YOUR_LINKEDIN_HEADLINE]"
 

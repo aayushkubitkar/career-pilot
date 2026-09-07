@@ -6,33 +6,56 @@ framework_version: 1.2.6
 
 <!-- SETUP: Skill match areas and career goals are personalized by running /setup -->
 
-## Eligibility Gate — run before scoring
+## Work Authorization Gate — run before scoring (US)
 
-If the candidate is not a citizen or permanent resident of the country they are applying in, run this first. It is a hard filter, not a scoring dimension, and it is separate from work-permit *timing*: timing asks "can they work the required hours yet?", eligibility asks "are they permitted to hold this job at all?". A candidate can pass timing and still be categorically excluded.
+A hard filter, not a scoring dimension. It asks a different question from work-permit
+*timing*: timing asks "can they work the required hours yet?"; this gate asks "will this
+employer hire someone with the candidate's authorization status at all?". A candidate can
+pass timing and still be categorically excluded.
 
-Read the posting's eligibility / work rights / "who can apply" section **verbatim** and classify:
+**Read the candidate's status first** — the **Work Authorization** block in `CLAUDE.md` /
+`01-candidate-profile.md`: their status (US citizen · permanent resident/green card ·
+OPT · STEM OPT · H-1B · TN · other) and whether they **need sponsorship now or in the
+future**. If that block is missing, ask the user before scoring — never guess.
+
+Then read the posting's eligibility / "who can apply" / work-authorization section
+**verbatim** and classify:
 
 | Posting wording | Verdict |
 |-----------------|---------|
-| Names a **citizenship or permanent-residency requirement** ("must be a citizen of X", "permanent resident", "PR required", "full working rights" where the employer means citizen/PR) | **FAIL — hard stop.** Do not score, do not draft. Quote the exact wording back to the user. |
-| Requires a **security clearance** at any level | **FAIL** in most countries, since clearance is normally gated on citizenship. Verify the specific scheme rather than assuming. |
-| **Explicitly names** the candidate's permit class, or says "international applicants welcome", "visa holders considered", "we sponsor" | **PASS** — verified acceptance. Worth noting as a positive in the application. |
-| **Silent** on citizenship or residency | **PROCEED, but mark unverified.** Check the employer's own careers or international-applicant page before drafting. |
+| "No visa sponsorship", "must be authorized to work in the US without sponsorship now or in the future", "we are unable to sponsor" — **and** the candidate needs sponsorship | **FAIL — hard stop.** Do not score, do not draft. Quote the exact line. |
+| "US Person" / ITAR / EAR / export-controlled role — **and** the candidate is not a citizen or green-card holder | **FAIL.** "US Person" in export-control law means citizen or permanent resident; verify the specific control, don't assume the reverse. |
+| Active security clearance required (Secret, TS, TS/SCI) — **and** the candidate does not already hold it | **FAIL.** Clearance sponsorship is gated on citizenship and takes many months; a "clearable" claim from a non-citizen is not a pass. |
+| "US citizens only" (most federal roles, some defense primes) — **and** the candidate is not a citizen | **FAIL.** |
+| Names the candidate's status positively — "OPT/CPT candidates welcome", "we sponsor H-1B and green cards", "open to visa holders" | **PASS**, and worth noting as a positive in the cover letter. |
+| Candidate is a **US citizen or green-card holder** | **PASS** on this gate regardless of the posting's sponsorship language (it doesn't apply to them). Clearance/US-Person rows above still apply to a green-card holder for clearance-required roles. |
+| Candidate **does not need sponsorship** (citizen, GC, or a currently-valid work permit) and the posting is **silent** | **PASS.** |
+| Candidate **needs sponsorship** and the posting is **silent** on it | **PROCEED, but mark unverified.** Many employers state their sponsorship policy on the careers page or the ATS's own screening question rather than the ad. Check the employer's careers/FAQ page before drafting; large consultancies, banks, defense, and government contractors are the highest-risk for a silent "no". |
 
 **Two rules that are easy to get wrong:**
 
-1. **Silence is not permission.** Large graduate programs frequently gate eligibility on their own website rather than in the job ad. Highest-risk categories: professional-services firms, government and defence, banking, telecommunications, and anything touching critical infrastructure.
-2. **A company-wide "we accept international applicants" statement is not role-level permission.** The common pattern is a general welcome followed by a *named list* of the specific programs or service lines it covers. Confirm the **specific posting or stream** appears on that list before drafting.
+1. **Silence is not a "no" for a candidate who needs sponsorship — but it is not a "yes" either.** Check the employer's own site. If it still can't be determined, tell the user it's unverified and let them decide whether to spend the application.
+2. **A general "we value diversity / all backgrounds" statement is not a sponsorship commitment.** Only an explicit statement about work authorization or visa sponsorship counts.
 
-**Report an eligibility failure to the user with the quoted source** rather than silently dropping the role. They may know something about their own status that the profile does not record.
+**Report a gate failure to the user with the quoted source** rather than silently dropping
+the role — they may know something about their status the profile doesn't record (a pending
+green card, a spouse's H-4 EAD, an approved I-140 that makes H-1B portability easy).
 
-If the candidate's permit also constrains *hours* or *start date* (a student visa with a term-time cap, a permit that begins on graduation), record that as a second gate under this section during `/setup`, with the specific dates. Do not merge it with the eligibility question above — they fail for different reasons and need different answers.
+### Second gate — permit timing (only if the candidate's status is time-limited)
 
-A role that fails this gate is not scored and not drafted. Everything below applies only to roles that pass it.
+If the candidate is on OPT / STEM OPT / a visa with an end date or a start-date condition
+(work authorization that begins on graduation, an OPT window closing on a known date, an
+H-1B that needs a transfer with lead time), `/setup` records the **specific dates** in the
+Work Authorization block. Check a posting's start date and expected tenure against them:
+a 12-month contract starting in two months against an OPT window that closes in five is a
+**FLAG for the user**, not an automatic fail.
+
+A role that fails the Work Authorization Gate is not scored and not drafted. Everything
+below applies only to roles that pass it.
 
 ## Language Gate — run before scoring
 
-This gate checks a posting's language requirements against what the candidate actually speaks. It is not one of the five Scoring Dimensions below - it runs before them, structured the same way as the Eligibility Gate above: read the posting, classify against profile data, and treat a hard mismatch as FAIL before scoring. Its verdict is tracked downstream: `/rank` records the result as `language_gate` (PASS/FAIL/FLAG) with a supporting `language_note`, persists both into `seen_jobs.json`, and treats a FAIL as a shortlist veto; `/scrape` surfaces the flag in its results table and carries a language-override rule for postings whose ad language differs from the role's working language. `/apply`'s language detection (Step 1, which extracts a posting's required language generically) feeds this same check.
+This gate checks a posting's language requirements against what the candidate actually speaks. It is not one of the five Scoring Dimensions below - it runs before them, structured the same way as the Work Authorization Gate above: read the posting, classify against profile data, and treat a hard mismatch as FAIL before scoring. Its verdict is tracked downstream: `/rank` records the result as `language_gate` (PASS/FAIL/FLAG) with a supporting `language_note`, persists both into `seen_jobs.json`, and treats a FAIL as a shortlist veto; `/scrape` surfaces the flag in its results table and carries a language-override rule for postings whose ad language differs from the role's working language. `/apply`'s language detection (Step 1, which extracts a posting's required language generically) feeds this same check.
 
 Read the posting's language requirements as stated for **the role itself** — not the language the ad happens to be written in. A posting written in a language you don't work in, for a role that only needs languages you do work in on the job, passes fine; only an explicit job-condition requirement ("fluent X required," "must communicate with the Y team in Z") triggers this check. For each language the posting requires as a job condition, compare it against your Languages table in CLAUDE.md / `01-candidate-profile.md`:
 

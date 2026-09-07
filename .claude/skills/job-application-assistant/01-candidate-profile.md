@@ -9,13 +9,23 @@ framework_version: 1.1.1
 
 ## Identity
 - **Name:** [YOUR_NAME]
-- **Location:** [YOUR_ADDRESS]
+- **Location:** [YOUR_CITY, STATE]
 - **Phone:** [YOUR_PHONE]
 - **Email:** [YOUR_EMAIL]
 - **LinkedIn:** [YOUR_LINKEDIN_URL]
 - **GitHub:** [YOUR_GITHUB_URL]
 - **Status:** [YOUR_EMPLOYMENT_STATUS]
 - **Constraints:** [YOUR_COMMUTE_OR_LOCATION_CONSTRAINTS]
+
+### Work Authorization (US)
+<!-- Read by the Work Authorization Gate in 04-job-evaluation.md before any posting is scored.
+Mirror CLAUDE.md's Work Authorization block exactly. -->
+
+| Field | Value |
+|-------|-------|
+| Status | [US citizen / permanent resident / OPT / STEM OPT / H-1B / TN / other] |
+| Needs sponsorship now or in the future | [yes / no] |
+| Key dates (if time-limited) | [e.g. "OPT valid through 2027-06"; blank if N/A] |
 
 ### Languages
 <!-- Every language you can work in professionally, with your honest level. Used by the
