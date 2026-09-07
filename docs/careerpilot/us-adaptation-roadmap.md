@@ -25,12 +25,21 @@ Goal: `/scrape` returns real, current US openings.
 
 ### B1. `ats-search` skill — Greenhouse + Lever + Ashby + SmartRecruiters ✅
 
-Commit e45d4de (GH/Lever/Ashby, 2026-09-07) + SmartRecruiters connector added later the
-same day. `.agents/skills/ats-search/` — zero-dep bun CLI, `search`/`detail`, fans across
-`companies.csv` (~30 verified US companies), per-company error isolation, 41 offline tests,
-live-verified. SmartRecruiters notes: paginated (capped ~150 unfiltered), server-side `q`,
-200s on unknown company → `meta.notes` not `meta.errors`, case-sensitive identifiers,
-skews enterprise/industrial (Bosch, WD, Experian). More detail:
+Commit e45d4de (GH/Lever/Ashby) + SmartRecruiters connector + **lenient fuzzy query
+matching** (commit d59fa46, 2026-09-07 — after the first real test run showed
+`-q "product manager fraud"` dropped real risk-PM roles). `.agents/skills/ats-search/` —
+zero-dep bun CLI, `search`/`detail`, fans across `companies.csv` (gitignored working copy;
+`.example` ships ~45 companies incl. consumer fintech), per-company error isolation, 49
+offline tests, live-verified.
+- **Matching**: `--query` is scored `0..1` (`scoreQuery`), not gated. Role gate + topic-word
+  coverage with light stemming; seniority words never gate. `--match fuzzy|any|strict`,
+  `--min-match`. `match_score` in output; `/scrape` keeps the lenient default, `/rank`
+  does deep fit.
+- SmartRecruiters: paginated (capped ~150 unfiltered), server-side `q`, 200s on unknown
+  company → `meta.notes` not `meta.errors`, case-sensitive ids, enterprise/industrial skew.
+- **Also fixed in job-scraper SKILL.md**: `linkedin-search` must run serially (rate-limits
+  to silent empty results under the parallel Agent fan-out).
+More detail:
 - Company list lives at `.agents/skills/ats-search/companies.csv` (+ `.example.csv`), not
   `documents/` — it's config, not career material, and ships populated so the skill works
   out of the box.
