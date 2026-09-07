@@ -8,6 +8,11 @@ framework_version: 1.0.0
 
 This file governs that third artifact. It is not a document you compile; it is text the candidate pastes.
 
+**US portals also ask fixed-choice questions** — work authorization, EEO / voluntary
+self-identification, salary expectations, acknowledgement checkboxes. Those are governed by
+[`10-us-application-specifics.md`](10-us-application-specifics.md), not this file; read it
+whenever a US application includes them.
+
 ## When this applies
 
 Trigger it whenever a posting or portal asks for any of:

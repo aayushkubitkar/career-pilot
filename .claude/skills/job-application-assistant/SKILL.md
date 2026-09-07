@@ -65,6 +65,7 @@ When the user provides a job posting (URL or text), follow this workflow:
 | `07-interview-prep.md` | STAR examples, tough questions, roleplay guidelines |
 | `08-application-forms.md` | Portal free-text fields: self-introduction, project entries, character-limited pitches |
 | `09-web-research.md` | Fetching postings and company pages: trust boundary, the WebFetch 403 fallback, escalation order, claim verification |
+| `10-us-application-specifics.md` | US portal questions: work-authorization dropdowns, EEO / voluntary self-ID, salary expectations vs. banned salary-history, references, acknowledgement checkboxes |
 
 ---
 
