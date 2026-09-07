@@ -103,13 +103,20 @@ Deviations found in build:
 
 ---
 
-## Phase C — US application conventions
+## Phase C — US application conventions  ✅ (2026-09-07, commits: C1 · C3 · C2 · C4)
 
 Goal: `/apply` produces US-correct résumés and handles US application forms.
 
-### C1. Work-authorization eligibility gate — `04-job-evaluation.md`
+**As built:** `framework_version` markers left **unbumped** on edited files, so
+`check_upstream_updates.py` flags them the moment upstream revises that methodology — the
+signal to re-check the US adaptation. `02-behavioral-profile.md` needed no change (already
+assessment-agnostic upstream). No `main_us_example.tex` variant — the single
+`main_example.tex` switched to `letterpaper` + US contact conventions instead (one master,
+less drift).
 
-Replace the citizenship "Eligibility Gate" with a US version (bump `framework_version`):
+### C1. Work-authorization eligibility gate — `04-job-evaluation.md`  ✅
+
+Replaced the citizenship "Eligibility Gate" with a US "Work Authorization Gate":
 
 | Posting wording | Verdict |
 |---|---|
@@ -120,29 +127,24 @@ Replace the citizenship "Eligibility Gate" with a US version (bump `framework_ve
 | Names the candidate's status positively ("OPT/CPT welcome", "we sponsor H-1B/GC") | **PASS**, note as a plus |
 | Silent | **PROCEED, mark unverified** — check the careers page; large firms gate sponsorship there |
 
-Keep the existing separate second gate for permit **timing** (OPT end date, STEM extension
-window, H-1B transfer lead time) captured during `/setup` with the specific dates.
+Kept a separate second gate for permit **timing** (OPT end date, STEM window, H-1B transfer
+lead time) as a FLAG. Reads the new Work Authorization block in `CLAUDE.md` /
+`01-candidate-profile.md`.
 
-### C2. US résumé — `05-cv-templates.md` + `cv/`
+### C2. US résumé — `05-cv-templates.md` + `cv/` + `apply.md`  ✅
 
-- [ ] "Resume" not "CV" throughout; US spelling.
-- [ ] **1 page** for students, new-grad, and <10 years experience; 2-page path kept for
-      senior. The PDF verification loop in `/apply` changes its page-count assertion to
-      match the active length rule.
-- [ ] Remove photo, date of birth, marital status, nationality, full address (city + state
-      only) from the template — US EEO norms and many ATS parsers.
-- [ ] Reverse-chronological, month-year dates, standard section order
-      (Summary/Skills optional → Experience → Projects → Education; Education first only for
-      current students / <1 yr out).
-- [ ] Add a US résumé template variant under `cv/` (`main_example.tex` stays; add
-      `main_us_example.tex` or adjust the default and note it). Keep it single-column for
-      ATS text-layer extraction (upstream already warns about multi-column).
-- [ ] `/add-template` still works for a user's own résumé.
+- [x] New "US résumé conventions" section: Letter paper, no photo/DOB/marital/nationality,
+      city+state (not street), US dates, Experience-before-Education, "upon request" refs.
+- [x] Length is profile-driven via a new `Resume length:` line in `CLAUDE.md` (1-page for
+      students / new grads / <10 yrs; 2-page otherwise). Page-budget table has both columns;
+      compile loop + section order + page-break guidance are all length-aware.
+- [x] `apply.md` drafter step + PDF checklist: "2 pages" → "matches `Resume length`".
+- [x] `cv/main_example.tex`: `a4paper` → `letterpaper`, address → `City, ST`.
+- [x] `CLAUDE.md` verification checklist + `README.md` `/apply` description updated.
 
-### C3. `10-us-application-specifics.md` (new reference file)
+### C3. `10-us-application-specifics.md` (new reference file)  ✅
 
-New file in `.claude/skills/job-application-assistant/`, linked from `SKILL.md`'s reference
-table and from `08-application-forms.md`:
+New file, linked from `SKILL.md`'s reference table and `08-application-forms.md`:
 
 - **Work-auth form questions** — "Are you legally authorized to work in the US?" (yes/no)
   and "Will you now or in the future require sponsorship?" — how to answer truthfully from
@@ -159,17 +161,22 @@ table and from `08-application-forms.md`:
 - **References** — "available upon request"; don't list on the résumé.
 - **At-will / background check / drug test** acknowledgements — informational, user decides.
 
-### C4. `/setup` — `setup.md`
+### C4. `/setup` — `setup.md`  ✅
 
-- [ ] Capture US work authorization (citizen / permanent resident / OPT / STEM OPT /
-      H-1B / needs sponsorship / other) and, if time-limited, the key dates.
-- [ ] Ask résumé length preference and confirm "Resume" (US) vs "CV" (academic).
-- [ ] Optional pre-declared EEO answers (or "decline all", the default).
-- [ ] US location + work-eligible states / remote timezone.
-- [ ] `01-candidate-profile.md` / `CLAUDE.md` templates gain a **Work Authorization** block.
+- [x] Path C Section 1 captures work authorization (status / needs-sponsorship / key dates)
+      and résumé length; Path A/B follow-ups do the same.
+- [x] New Section 8b: optional pre-declared EEO self-ID (default "decline all") + target
+      salary range.
+- [x] Step 3.1 spells out filling the CLAUDE.md Work Authorization table + Resume length.
+- [x] `/setup --section workauth` re-runs just those questions.
+- [x] `CLAUDE.md` + `01-candidate-profile.md` gained the **Work Authorization** block (in C1).
 
-**Ships:** an end-to-end `/apply` on a US posting yields a 1-page (or length-correct) US
-résumé, a correctly-gated fit eval, and correct answers to work-auth + EEO form fields.
+**Ships:** an end-to-end `/apply` on a US posting yields a length-correct US résumé, a
+work-authorization-gated fit eval, and correct answers to work-auth + EEO + salary form
+fields. ✅ delivered
+
+Pre-existing (not introduced here): `tests/test_rank_state.py` (25) fail under this
+machine's Python 3.9 — the repo needs 3.10+; identical on pristine v1.7.1, green on CI.
 
 ---
 

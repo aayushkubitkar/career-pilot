@@ -71,11 +71,13 @@ verification loop, `/interview`, `/outcome`, `/gmail-sync`, `/notion-sync`, `/ht
 Detailed phase specs: [`docs/careerpilot/us-adaptation-roadmap.md`](docs/careerpilot/us-adaptation-roadmap.md).
 
 - **Phase A — Adopt & orient** ✅ vendor v1.7.1, upstream remote, this doc. `/setup` runs as-is.
-- **Phase B — US discovery** — 🚧 `ats-search` (Greenhouse+Lever+Ashby) ✅ · `adzuna-search`
-  (broad aggregator) ✅ · `usajobs-search` (federal) next. US `search-queries.md` + settings ✅.
-- **Phase C — US application conventions** — US work-auth eligibility gate; US résumé
-  templates + rules; `10-us-application-specifics.md` (EEO, work-auth form Qs, salary
-  history); `/setup` captures US work auth. Ships: `/apply` produces US-correct résumés.
+- **Phase B — US discovery** — `ats-search` (Greenhouse+Lever+Ashby) ✅ · `adzuna-search`
+  (broad aggregator) ✅ · `usajobs-search` (federal) **parked** (user not targeting federal).
+  US `search-queries.md` + settings ✅.
+- **Phase C — US application conventions** ✅ — US Work Authorization Gate
+  (`04-job-evaluation.md`); profile-driven résumé length + US conventions
+  (`05-cv-templates.md`, `cv/`, `apply.md`); `10-us-application-specifics.md` (EEO,
+  work-auth form Qs, salary-history bans); `/setup` captures work auth + résumé length.
 - **Phase D — US tracking & prep polish** — US salary data source; US company-research
   sources; review `/gmail-sync` / `/interview` / `/html-report` for US-ism. Ships: full loop.
 - **Phase E — Upstream cadence** — weekly triage, adopt releases.
