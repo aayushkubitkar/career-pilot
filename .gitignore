@@ -39,6 +39,7 @@ linkedin_Profile.pdf
 *.jpeg
 *.png
 !cover_letters/OpenFonts/fonts/**
+!assets/careerpilot-logo.png
 
 # OS files
 .DS_Store

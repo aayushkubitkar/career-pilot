@@ -123,6 +123,8 @@ ALLOWED_IGNORE_NEGATIONS = {
     "!cv/main_example.tex",
     "!cover_letters/cover_example.tex",
     "!documents/**/.gitkeep",
+    # CareerPilot: the README header logo, re-included past the *.png photo/signature rule.
+    "!assets/careerpilot-logo.png",
 }
 
 # Hook commands the template legitimately ships, as "<Event>:<command>" strings.

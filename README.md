@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/mascot/pip_flight_loop.gif" alt="Pip, the courier bird" width="160">
+  <img src="assets/careerpilot-logo.png" alt="CareerPilot" width="180">
 </p>
 
 # CareerPilot
