@@ -1,8 +1,8 @@
-# CareerPilot — Product Spec
+# Ghostwriter — Product Spec
 
-> **Status: historical / north-star (2026-09-06).** Written before CareerPilot adopted
+> **Status: historical / north-star (2026-09-06).** Written before Ghostwriter adopted
 > [`ai-job-search`](https://github.com/MadsLorentzen/ai-job-search) as its base
-> (see [`../../CAREERPILOT.md`](../../CAREERPILOT.md)). The *principles* here still hold and
+> (see [`../../GHOSTWRITER.md`](../../GHOSTWRITER.md)). The *principles* here still hold and
 > guided the decision to adopt. The *tech-stack* and *phased-build* sections describe a
 > standalone TypeScript/SQLite CLI that was **not** pursued — the adopted framework is
 > Claude-Code-native with flat-file state. Kept for the requirements it captures (data
@@ -19,7 +19,7 @@ Owner: kc101@rice.edu. Not a product; optimized for one person's search.
 ## 1. Principles
 
 1. **Local-first.** All data (career profile, job database, generated documents, application
-   history) lives on disk under `$CAREERPILOT_HOME` (default `~/.careerpilot`). No server, no
+   history) lives on disk under `$GHOSTWRITER_HOME` (default `~/.ghostwriter`). No server, no
    account. Nothing leaves the machine except calls to the Anthropic API and to public job
    APIs the user opted into.
 2. **Human-in-the-loop for anything outward-facing.** The agent never submits an application,
@@ -51,11 +51,11 @@ Owner: kc101@rice.edu. Not a product; optimized for one person's search.
 | LLM | Anthropic API via `@anthropic-ai/sdk` | Structured output via tool-use; model configurable. |
 | Browser automation | `playwright` (Chromium) | Phase 4+. Form-fill only. |
 | Document rendering | HTML template → PDF via Playwright's Chromium | No extra binary; consistent output. Résumé/cover-letter templates in `src/templates`. |
-| Config | `.env` (secrets) + `config.json` under `$CAREERPILOT_HOME` (preferences) | Secrets never in the data dir; preferences never in the repo. |
+| Config | `.env` (secrets) + `config.json` under `$GHOSTWRITER_HOME` (preferences) | Secrets never in the data dir; preferences never in the repo. |
 | Testing | `vitest` | Fast, TS-native. |
 
-Command surface: a single binary `careerpilot` (alias `cp`), organized as
-`careerpilot <noun> <verb>` (e.g. `careerpilot jobs list`, `careerpilot profile edit`).
+Command surface: a single binary `ghostwriter` (alias `cp`), organized as
+`ghostwriter <noun> <verb>` (e.g. `ghostwriter jobs list`, `ghostwriter profile edit`).
 
 ---
 
@@ -119,7 +119,7 @@ applied → screening → oa → phone → onsite → offer | rejected | withdra
 - Email: Gmail integration creates **drafts** only; it never sends.
 - Discovery: per-host request throttle + on-disk response cache; `robots`/ToS-respecting
   source list is hard-coded, not user-extensible to arbitrary scrapers.
-- All LLM calls log prompt + response to `$CAREERPILOT_HOME/logs` for auditability.
+- All LLM calls log prompt + response to `$GHOSTWRITER_HOME/logs` for auditability.
 
 ---
 

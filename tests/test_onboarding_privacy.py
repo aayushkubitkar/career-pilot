@@ -3,7 +3,7 @@
 A fork of a public repo cannot be private, and /setup writes personal data
 into tracked files - a real user was bitten by discovering this only in
 SETUP.md section 8, downstream of the decision. These tests pin that the
-warning is complete and sits at the point of decision (CareerPilot: the
+warning is complete and sits at the point of decision (Ghostwriter: the
 README's "## Privacy" section; upstream SETUP.md: "## 2. Fork and clone"),
 and that /setup checks the origin's visibility BEFORE writing anything.
 """
@@ -46,7 +46,7 @@ class TestForkWarningsAtTheDecisionPoint(unittest.TestCase):
         )
 
     def test_readme_warns_about_personal_data_and_a_public_repo(self):
-        # CareerPilot's README replaced upstream's "### 1. Fork and clone"
+        # Ghostwriter's README replaced upstream's "### 1. Fork and clone"
         # walkthrough with a dedicated "## Privacy" section; the warning must
         # still be there, complete, and it must carry the /setup wording.
         body = section(README.read_text(encoding="utf-8"), "## Privacy")

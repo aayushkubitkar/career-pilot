@@ -1,6 +1,6 @@
-# CareerPilot — US Adaptation Roadmap
+# Ghostwriter — US Adaptation Roadmap
 
-Live plan. Built on `ai-job-search` v1.7.1 (see [`../../CAREERPILOT.md`](../../CAREERPILOT.md)).
+Live plan. Built on `ai-job-search` v1.7.1 (see [`../../GHOSTWRITER.md`](../../GHOSTWRITER.md)).
 Each phase ships a slice that leaves `/scrape` → `/rank` → `/apply` → `/interview` working.
 
 Principle: **change the market layer, leave the engine.** Prefer adapting an upstream
@@ -12,7 +12,7 @@ of core we diverge on is a line we merge-conflict on at the next release.
 ## Phase A — Adopt & orient  ✅ (2026-09-06)
 
 - [x] Vendor upstream v1.7.1 with full history; `upstream` remote; `master` on top of the tag
-- [x] `CAREERPILOT.md` charter, `docs/careerpilot/` (this file + historical SPEC)
+- [x] `GHOSTWRITER.md` charter, `docs/ghostwriter/` (this file + historical SPEC)
 - [x] Retired the standalone TS/SQLite Phase 0 (archived outside the repo)
 
 `/setup`, `/scrape` (LinkedIn + freehire only), `/apply`, `/interview` all run as-is today.
@@ -97,7 +97,7 @@ Deviations found in build:
   the `url` for the body. Documented in SKILL.md + url-reference.md.
 - `comp` surfaced only when `salary_is_predicted === "0"` (posting stated it); Adzuna's ML
   salary estimates are dropped.
-- Env vars documented in each SKILL.md "Setup" + `CAREERPILOT.md`, not a committed
+- Env vars documented in each SKILL.md "Setup" + `GHOSTWRITER.md`, not a committed
   `.env.example` (the repo's `.gitignore` treats `.env.*` as a required-ignore rule).
 
 ### B4. Wire-up
@@ -107,7 +107,7 @@ Deviations found in build:
 - [x] Danish portals — already `enabled: false` upstream; nothing to do.
 - [x] `.claude/skills/job-scraper/search-queries.md` rewritten for the US (ats-search
       primary, adzuna + LinkedIn/freehire for breadth, Danish off, WebSearch fallback = US boards).
-- [x] Env-var docs: per-skill `SKILL.md` "Setup" + `CAREERPILOT.md` "Local secrets".
+- [x] Env-var docs: per-skill `SKILL.md` "Setup" + `GHOSTWRITER.md` "Local secrets".
       No committed `.env.example` (`.gitignore` treats `.env.*` as required-ignore).
 
 **Ships:** `/scrape` searches curated US companies + federal + an aggregator, dedupes into
@@ -220,7 +220,7 @@ low-ROI after the value-prop review.
 - [ ] On each upstream release: `check_upstream_updates.py`, review touched methodology
       files, `git merge <tag>`, resolve by keeping US changes + adopting the method change,
       record any deliberately-skipped commits in `.github/upstream-wontport.txt`.
-- [ ] Keep a short CareerPilot changelog section (or a `docs/careerpilot/CHANGELOG.md`)
+- [ ] Keep a short Ghostwriter changelog section (or a `docs/ghostwriter/CHANGELOG.md`)
       separate from upstream's `CHANGELOG.md`.
 
 ---

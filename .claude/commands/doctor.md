@@ -1,6 +1,6 @@
 # /doctor - Environment check & project bootstrap
 
-You are getting this CareerPilot checkout ready to run: check for the tools the workflow
+You are getting this Ghostwriter checkout ready to run: check for the tools the workflow
 needs, install the project-local pieces automatically, and offer to install anything
 system-level that is missing. Safe to re-run any time.
 
@@ -62,7 +62,7 @@ Skip a sub-step if its result is already in place. Do **not** prompt for these.
 
 3. **`.env`.** If there is no `.env` at the repo root, create one with commented placeholders:
    ```
-   # CareerPilot local environment - gitignored, never committed.
+   # Ghostwriter local environment - gitignored, never committed.
    # Fill in the keys for the sources you want; /scrape skips a source whose key is unset.
 
    # adzuna-search - broad US aggregator. Free key: https://developer.adzuna.com
@@ -98,7 +98,7 @@ skills invoke it as a bare `bun run …`, which only resolves once it is on the 
 
 ### Python 3.9+ (only if `python3` is genuinely absent)
 
-Stock macOS and every current Linux ship Python 3.9 or newer, and the CareerPilot tools run
+Stock macOS and every current Linux ship Python 3.9 or newer, and the Ghostwriter tools run
 on 3.9 — so this is rare. If `python3` truly is not found:
 - macOS with Homebrew: `brew install python@3.12`
 - otherwise: install from <https://www.python.org/downloads/>

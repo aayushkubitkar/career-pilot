@@ -1,20 +1,20 @@
 <p align="center">
-  <img src="assets/careerpilot-logo.png" alt="CareerPilot" width="180">
+  <img src="assets/ghostwriter-logo.png" alt="Ghostwriter" width="180">
 </p>
 
-# CareerPilot
+# Ghostwriter
 
 *A job search that runs on your machine — tuned for the US market.*
 
-CareerPilot turns [Claude Code](https://claude.com/claude-code) into an end-to-end job-search
+Ghostwriter turns [Claude Code](https://claude.com/claude-code) into an end-to-end job-search
 assistant: it discovers openings, scores them against your profile, tailors a résumé and
 cover letter for each one, preps you for interviews, and tracks the whole pipeline — all
 locally, with you approving anything that goes to an employer.
 
 It is a **US-market adaptation of [MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search)**
-(MIT), which built the core workflow and the job-portal-skill pattern. CareerPilot keeps
+(MIT), which built the core workflow and the job-portal-skill pattern. Ghostwriter keeps
 that engine and swaps the market layer: US ATS job boards, US work-authorization handling,
-US résumé conventions, and US application-form guidance. See [`CAREERPILOT.md`](CAREERPILOT.md)
+US résumé conventions, and US application-form guidance. See [`GHOSTWRITER.md`](GHOSTWRITER.md)
 for exactly what differs and why.
 
 ```
@@ -45,8 +45,8 @@ targets          into one list          work-auth gate          letter, compile 
 - **Tracking & prep** — a pipeline tracker, `/interview` prep packs, `/gmail-sync`,
   `/html-report`, `/upskill`, and more.
 
-Full command list and the design spec: [`CAREERPILOT.md`](CAREERPILOT.md),
-[`docs/careerpilot/`](docs/careerpilot/). The upstream framework's own README (workflow
+Full command list and the design spec: [`GHOSTWRITER.md`](GHOSTWRITER.md),
+[`docs/ghostwriter/`](docs/ghostwriter/). The upstream framework's own README (workflow
 internals, the `/apply` drafter-reviewer design, community forks) is preserved at
 [`docs/UPSTREAM_README.md`](docs/UPSTREAM_README.md).
 
@@ -68,8 +68,8 @@ PATH. Optional external keys (Adzuna, USAJOBS) are free and `/scrape` works with
 ## Quick start
 
 ```bash
-git clone git@github.com:<you>/career-pilot.git
-cd career-pilot
+git clone git@github.com:<you>/ghostwriter.git
+cd ghostwriter
 claude
 ```
 then, inside Claude Code:
@@ -94,7 +94,7 @@ public repo is **always public**, so if you plan to push:
 
 - push to a **private** repository, **or**
 - keep your profile on a **local branch** and push only the framework to your public repo —
-  the two-command recipe is in [`CAREERPILOT.md`](CAREERPILOT.md#repo-setup), and the same
+  the two-command recipe is in [`GHOSTWRITER.md`](GHOSTWRITER.md#repo-setup), and the same
   private-remote / upstream-sync flow is in [`SETUP.md` section 8](SETUP.md#8-pulling-upstream-updates-into-your-fork).
 
 The tracker (`job_search_tracker.csv`), generated documents, `documents/`, `companies.csv`,

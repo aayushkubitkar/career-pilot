@@ -6,7 +6,7 @@
 
 `/scrape` discovers every portal skill under `.agents/skills/*/SKILL.md` and runs its CLI first. You do **not** need a matching `site:` line below for those CLIs to run.
 
-CareerPilot (US market) ships these **enabled**:
+Ghostwriter (US market) ships these **enabled**:
 
 - **`ats-search`** — Greenhouse / Lever / Ashby company boards, fanned across
   `.agents/skills/ats-search/companies.csv`. This is the primary US source: it hits the

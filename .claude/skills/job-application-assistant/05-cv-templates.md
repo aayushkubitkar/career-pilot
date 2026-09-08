@@ -8,7 +8,7 @@ framework_version: 1.4.3
 
 ## US résumé conventions
 
-CareerPilot targets the **US market**. "CV" throughout this file means the one-to-two-page
+Ghostwriter targets the **US market**. "CV" throughout this file means the one-to-two-page
 **résumé** US employers expect — not an academic CV. The moderncv template and every
 `cv/main_*.tex` filename stay as they are; only the conventions below change.
 

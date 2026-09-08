@@ -49,9 +49,9 @@ ALLOWED_PERMISSIONS = {
     "Bash(bun run .agents/skills/jobnet-search/cli/src/cli.ts:*)",
     "Bash(bun run .agents/skills/linkedin-search/cli/src/cli.ts:*)",
     "Bash(bun run .agents/skills/freehire-search/cli/src/cli.ts:*)",
-    # CareerPilot (US adaptation): unified Greenhouse/Lever/Ashby board search.
+    # Ghostwriter (US adaptation): unified Greenhouse/Lever/Ashby board search.
     "Bash(bun run .agents/skills/ats-search/cli/src/cli.ts:*)",
-    # CareerPilot (US adaptation): Adzuna aggregator search (reads ADZUNA_APP_ID/KEY from env).
+    # Ghostwriter (US adaptation): Adzuna aggregator search (reads ADZUNA_APP_ID/KEY from env).
     "Bash(bun run .agents/skills/adzuna-search/cli/src/cli.ts:*)",
     "Bash(python salary_lookup.py:*)",
     "Bash(python3 salary_lookup.py:*)",
@@ -123,8 +123,8 @@ ALLOWED_IGNORE_NEGATIONS = {
     "!cv/main_example.tex",
     "!cover_letters/cover_example.tex",
     "!documents/**/.gitkeep",
-    # CareerPilot: the README header logo, re-included past the *.png photo/signature rule.
-    "!assets/careerpilot-logo.png",
+    # Ghostwriter: the README header logo, re-included past the *.png photo/signature rule.
+    "!assets/ghostwriter-logo.png",
 }
 
 # Hook commands the template legitimately ships, as "<Event>:<command>" strings.

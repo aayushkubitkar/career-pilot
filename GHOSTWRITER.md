@@ -1,16 +1,16 @@
-# CareerPilot — US-market adaptation of `ai-job-search`
+# Ghostwriter — US-market adaptation of `ai-job-search`
 
-CareerPilot is a personal, local, Claude-Code-native job-search workspace. It is built on
+Ghostwriter is a personal, local, Claude-Code-native job-search workspace. It is built on
 **[MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search)** (MIT),
 vendored at **v1.7.1**, and adapted for the **United States** job market.
 
 The upstream framework is country-agnostic in its core (self-profiling, fit evaluation, the
 drafter–reviewer application pipeline, interview prep, tracking) but ships Danish job-portal
-skills and European CV conventions. CareerPilot keeps the core, swaps the market layer.
+skills and European CV conventions. Ghostwriter keeps the core, swaps the market layer.
 
 - Upstream docs — [`README.md`](README.md), [`SETUP.md`](SETUP.md), [`CLAUDE.md`](CLAUDE.md)
 - Upstream methodology — [`.claude/skills/job-application-assistant/`](.claude/skills/job-application-assistant/)
-- This project's north-star spec (pre-adoption) — [`docs/careerpilot/SPEC.md`](docs/careerpilot/SPEC.md)
+- This project's north-star spec (pre-adoption) — [`docs/ghostwriter/SPEC.md`](docs/ghostwriter/SPEC.md)
 
 ## Repo setup
 
@@ -32,7 +32,7 @@ git merge v1.8.0                            # adopt a release; resolve conflicts
                                             # your data and adopting the methodology change
 ```
 
-CareerPilot's own US-adaptation commits live on `master` on top of the `v1.7.1` tag, so a
+Ghostwriter's own US-adaptation commits live on `master` on top of the `v1.7.1` tag, so a
 `git merge <newer-tag>` three-way-merges upstream changes around them.
 
 ### Setup — `/doctor`
@@ -61,7 +61,7 @@ whose key is unset fails cleanly (`code: MISSING_CREDENTIALS`) and `/scrape` ski
 
 ## What changes for the US
 
-| Area | Upstream (Denmark) | CareerPilot (US) |
+| Area | Upstream (Denmark) | Ghostwriter (US) |
 |---|---|---|
 | Job portals | Jobindex, Jobnet, Akademikernes Jobbank, Jobdanmark | Greenhouse / Lever / Ashby / SmartRecruiters ATS APIs, Adzuna aggregator; keep LinkedIn + freehire |
 | Eligibility gate | Citizenship / PR of the country | US work authorization: citizen · GC · OPT / STEM OPT · H-1B transfer · needs sponsorship; detect "no sponsorship", ITAR "US Person", clearance |
@@ -77,7 +77,7 @@ verification loop, `/interview`, `/outcome`, `/gmail-sync`, `/notion-sync`, `/ht
 
 ## Adaptation roadmap
 
-Detailed phase specs: [`docs/careerpilot/us-adaptation-roadmap.md`](docs/careerpilot/us-adaptation-roadmap.md).
+Detailed phase specs: [`docs/ghostwriter/us-adaptation-roadmap.md`](docs/ghostwriter/us-adaptation-roadmap.md).
 
 - **Phase A — Adopt & orient** ✅ vendor v1.7.1, upstream remote, this doc. `/setup` runs as-is.
 - **Phase B — US discovery** — `ats-search` (Greenhouse+Lever+Ashby+**SmartRecruiters**) ✅ ·
@@ -96,5 +96,5 @@ Detailed phase specs: [`docs/careerpilot/us-adaptation-roadmap.md`](docs/careerp
 
 Built on `ai-job-search` by [Mads Lorentzen](https://github.com/MadsLorentzen), MIT-licensed
 (see [`LICENSE`](LICENSE)). Job-search CLI skill pattern originally by
-[Mikkel Krogholm](https://github.com/mikkelkrogsholm). CareerPilot is an independent personal
+[Mikkel Krogholm](https://github.com/mikkelkrogsholm). Ghostwriter is an independent personal
 adaptation, not affiliated with or endorsed by the upstream author.
