@@ -36,6 +36,11 @@ Both subcommands print JSON on stdout. Exit 0 on success, 1 on a usage or
 state error, or on `apply` when any result could not be written.
 """
 
+# Keeps the `X | None` return annotations working on Python 3.9 (still the stock
+# macOS `python3`), where PEP 604 unions error at def-time. Nothing here evaluates
+# an annotation at runtime, so making them lazy strings is a no-op for behaviour.
+from __future__ import annotations
+
 import argparse
 import json
 import os
