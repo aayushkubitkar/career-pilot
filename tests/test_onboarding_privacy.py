@@ -1,13 +1,11 @@
 """Guards for the onboarding privacy warnings (issue #345).
 
-The README's quick start walks a new user into creating a public fork
-(forks of public repos cannot be private) and then has /setup write
-personal data into tracked files, with the only complete warning sitting
-in SETUP.md section 8 - a section about pulling updates, downstream of
-the decision it should inform. A real user hit exactly this. These tests
-pin that the warning lives at the point of decision (adjacent to both
-fork commands) and that /setup checks the origin's visibility BEFORE
-writing anything, not in its closing notes.
+A fork of a public repo cannot be private, and /setup writes personal data
+into tracked files - a real user was bitten by discovering this only in
+SETUP.md section 8, downstream of the decision. These tests pin that the
+warning is complete and sits at the point of decision (CareerPilot: the
+README's "## Privacy" section; upstream SETUP.md: "## 2. Fork and clone"),
+and that /setup checks the origin's visibility BEFORE writing anything.
 """
 import re
 import unittest
@@ -47,9 +45,13 @@ class TestForkWarningsAtTheDecisionPoint(unittest.TestCase):
             f"{where}'s fork section must point at SETUP.md section 8's private-remote recipe",
         )
 
-    def test_readme_quick_start_warns_next_to_the_fork_command(self):
-        body = section(README.read_text(encoding="utf-8"), "### 1. Fork and clone")
-        self.assertIn("gh repo fork", body, "sanity: the fork command lives in this section")
+    def test_readme_warns_about_personal_data_and_a_public_repo(self):
+        # CareerPilot's README replaced upstream's "### 1. Fork and clone"
+        # walkthrough with a dedicated "## Privacy" section; the warning must
+        # still be there, complete, and it must carry the /setup wording.
+        body = section(README.read_text(encoding="utf-8"), "## Privacy")
+        self.assertTrue(body, "README must have a '## Privacy' section")
+        self.assertIn("/setup", body, "the Privacy section must name /setup as what writes personal data")
         self.assert_warns(body, "README")
 
     def test_setup_guide_warns_next_to_the_fork_command(self):

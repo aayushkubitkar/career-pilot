@@ -35,10 +35,19 @@ git merge v1.8.0                            # adopt a release; resolve conflicts
 CareerPilot's own US-adaptation commits live on `master` on top of the `v1.7.1` tag, so a
 `git merge <newer-tag>` three-way-merges upstream changes around them.
 
+### Setup — `/doctor`
+
+`/doctor` (`.claude/commands/doctor.md`) checks the environment and does the project-local
+bootstrap: detects Bun / Python / LaTeX, creates `companies.csv` from the example and a
+`.env` skeleton, checks for `pypdf`, and offers to install any missing system prerequisite
+(showing the command first). It runs automatically as `/setup` Step 0a; run it standalone
+any time to re-check or install a prerequisite you deferred. `rank_state.py` and the other
+`tools/` helpers run on stock **Python 3.9+**, so a fresh macOS needs no Python install.
+
 ### Local secrets (`.env`)
 
 Some portal skills need an API key. Put them in a **`.env`** at the repo root — it's
-gitignored, and Bun auto-loads it for every `bun run .agents/skills/…` call. Currently:
+gitignored, Bun auto-loads it, and `/doctor` scaffolds it. Currently:
 
 ```
 ADZUNA_APP_ID=…          # adzuna-search — free key at https://developer.adzuna.com

@@ -52,48 +52,53 @@ internals, the `/apply` drafter-reviewer design, community forks) is preserved a
 
 ## Prerequisites
 
-- **[Claude Code](https://claude.com/claude-code)** (CLI).
-- **[Bun](https://bun.sh)** — runs the job-search CLIs.
-- **Python 3.10+** — the `tools/` helpers (`/rank`, PDF checks). A repo `.venv` is the
-  simplest way: `python3.12 -m venv .venv && .venv/bin/pip install pyyaml pypdf`.
-- **A LaTeX distribution** with `lualatex` + `xelatex` — [TinyTeX](https://yihui.org/tinytex/)
-  is the lightest. `/apply` compiles and visually inspects every PDF. First run,
-  `tlmgr install` the packages `moderncv` pulls (`fontawesome6`, `fontspec`, `needspace`,
-  `titlesec`, …).
-- Optional: `pip install pypdf` for the ATS text-layer check (Poppler `pdftotext` is a fallback).
+You install two things; **`/doctor` handles the rest** (it runs automatically at the start
+of `/setup`, and detects + offers to install anything missing):
+
+- **[Claude Code](https://claude.com/claude-code)** — how you run everything.
+- **[Bun](https://bun.sh)** and a **LaTeX distribution** with `lualatex` + `xelatex`
+  ([TinyTeX](https://yihui.org/tinytex/) is lightest). If you skip these, `/doctor` will
+  offer to install them for you on the first run.
+- Python 3.9+ (stock macOS / any current Linux is fine — the helper scripts run on 3.9).
+
+`/doctor` does the project-local setup for you: a starter `companies.csv`, a `.env` skeleton,
+and an `import pypdf` check. The portal CLIs have zero dependencies — they just need Bun on
+PATH. Optional external keys (Adzuna, USAJOBS) are free and `/scrape` works without them.
 
 ## Quick start
 
 ```bash
-git clone <your fork of this repo>
+git clone git@github.com:<you>/career-pilot.git
 cd career-pilot
-
-# job-search CLIs
-for d in .agents/skills/*/cli; do (cd "$d" && bun install); done
-
-# python helpers
-python3.12 -m venv .venv && .venv/bin/pip install pyyaml pypdf
-
-# aggregator key (optional, free — https://developer.adzuna.com)
-cp -n /dev/null .env && printf 'ADZUNA_APP_ID=...\nADZUNA_APP_KEY=...\n' >> .env
-
-# curate your company list
-cp .agents/skills/ats-search/companies.example.csv .agents/skills/ats-search/companies.csv
-
-claude          # then, inside Claude Code:
-/setup          # import your résumé, work authorization, targets
-/scrape         # find openings
-/rank           # score them
-/apply <url>    # tailor + draft for one
+claude
 ```
+then, inside Claude Code:
+```
+/doctor          # checks the environment, installs the local pieces, offers the rest
+/setup           # import your résumé, work authorization, targets
+/scrape          # find openings
+/rank            # score them against your profile + work-auth gate
+/apply <url>     # evaluate fit, draft a tailored résumé + cover letter, compile, verify
+```
+`/setup` runs `/doctor` for you, so `/setup` alone is enough on a fresh clone — run
+`/doctor` on its own whenever you want to re-check or install a prerequisite you deferred.
 
 ## Privacy
 
 Everything runs locally. The only outbound calls are to the Anthropic API and to the public
-job APIs you opt into. `/setup` writes your personal data into **tracked** profile files, so
-if you push anywhere, use a **private** repo (or keep your profile on a local branch and
-push only the framework — see [`CAREERPILOT.md`](CAREERPILOT.md#repo-setup)). The tracker,
-generated documents, `documents/`, and `.env` are gitignored and never committed.
+job APIs you opt into.
+
+**`/setup` writes your personal data** (name, contact details, employment history, salary
+expectations, work-authorization status) **into tracked profile files.** A GitHub fork of a
+public repo is **always public**, so if you plan to push:
+
+- push to a **private** repository, **or**
+- keep your profile on a **local branch** and push only the framework to your public repo —
+  the two-command recipe is in [`CAREERPILOT.md`](CAREERPILOT.md#repo-setup), and the same
+  private-remote / upstream-sync flow is in [`SETUP.md` section 8](SETUP.md#8-pulling-upstream-updates-into-your-fork).
+
+The tracker (`job_search_tracker.csv`), generated documents, `documents/`, `companies.csv`,
+and `.env` are gitignored and never committed.
 
 ## Credits
 

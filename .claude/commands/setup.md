@@ -10,7 +10,18 @@ There are three paths into setup. Step 0 picks the right one; all three converge
 
 If `$ARGUMENTS` contains `--section <name>`, skip directly to that section in Path C for an update-only flow. Do not run the path-selection prompt below. `--section workauth` re-runs just Section 1's US work-authorization and résumé-length questions and rewrites those blocks in `CLAUDE.md` / `01-candidate-profile.md` (useful when an OPT date changes or a green card comes through).
 
-Otherwise, first check where this working copy would publish to — **before anything is
+### Step 0a: Environment
+
+Unless `$ARGUMENTS` contains `--skip-doctor`, first run the **`/doctor`** flow
+(`.claude/commands/doctor.md`) — its Step 1 detection and Step 2 project-local bootstrap
+(job-search CLI installs, `companies.csv`, `.env` skeleton). This is cheap and idempotent.
+If `/doctor` finds a **blocker** missing (Bun, or LaTeX when the user will want `/apply`),
+surface it and let the user install it now or continue — profile onboarding itself needs
+neither. If a system install runs, tell the user to restart Claude Code before `/scrape`.
+
+### Step 0b: Publish target
+
+Then check where this working copy would publish to — **before anything is
 written, not after** (the Step 4 privacy note fires only once every file is already on
 disk, which is too late to inform the decision). Run `git remote get-url origin`; if the
 command fails (no remote, or not a git checkout), skip this check silently. If there is
